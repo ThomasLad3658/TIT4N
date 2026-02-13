@@ -1,13 +1,24 @@
 #include "Background.hpp"
 
-Background::Background(SDL_Renderer* renderer, const char* path) : renderer(renderer), path(path) {
+Background::Background(SDL_Renderer* renderer, const char* path) : 
+	renderer(renderer), path(path) {
 	texture = IMG_LoadTexture(renderer, path);
 	if (!texture) {
 		std::cerr << "Failed to load background texture : " << SDL_GetError() << std::endl;
 	}
-	w = 
+	srcrect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
+	dstrect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 }
 
 Background::~Background(){
 	SDL_DestroyTexture(texture);
+}
+
+bool Background::present()
+{
+	if (!SDL_RenderTexture(renderer, texture, &srcrect, &dstrect)) {
+		std::cerr << "Failed to render background texture : " << SDL_GetError() << std::endl;
+		return false;
+	}
+	else return true;
 }

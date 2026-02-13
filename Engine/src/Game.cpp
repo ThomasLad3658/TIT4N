@@ -1,14 +1,11 @@
 #include "Game.hpp"
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
-
 Game::Game(){
 	std::cout << "Initializing Game...\n";
 	if (SDL_Init(SDL_INIT_VIDEO || SDL_INIT_AUDIO) != 0) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
 	}
-
+	
 	window = SDL_CreateWindow("TIT4N", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
@@ -18,11 +15,13 @@ Game::Game(){
 	if (!renderer) {
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 	}
+	background = new Background(renderer, "assets/backgrounds/test.png");
 }
 
 Game::~Game(){
 	std::cout << "Cleaning Game...";
 
+	delete background;
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -44,6 +43,7 @@ void Game::Run(){
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
+		background->present();
 		SDL_RenderPresent(renderer);
 
 	}
