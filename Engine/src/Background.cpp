@@ -6,8 +6,8 @@ Background::Background(SDL_Renderer* renderer, const char* path) :
 	if (!texture) {
 		std::cerr << "Failed to load background texture : " << SDL_GetError() << std::endl;
 	}
-	srcrect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
-	dstrect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
+	srcrect = { 0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT };
+	dstrect = { 0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT };
 }
 
 Background::~Background(){

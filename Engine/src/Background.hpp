@@ -16,4 +16,6 @@ private:
 	const char* path;
 	SDL_FRect srcrect;
 	SDL_FRect dstrect;
+	float x;
+	float y;
 };
