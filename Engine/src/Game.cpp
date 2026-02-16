@@ -2,7 +2,7 @@
 
 Game::Game(){
 	std::cout << "Initializing Game...\n";
-	if (SDL_Init(SDL_INIT_VIDEO || SDL_INIT_AUDIO) == 0) {
+	if (!SDL_Init(SDL_INIT_VIDEO || SDL_INIT_AUDIO)) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
 	}
 	
