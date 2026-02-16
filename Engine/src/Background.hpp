@@ -9,6 +9,7 @@ public:
 	Background(SDL_Renderer* renderer, const char* path);
 	~Background();
 	bool present();
+	void setPosition(float x, float y);
 
 private:
 	SDL_Renderer* renderer;
@@ -16,6 +17,4 @@ private:
 	const char* path;
 	SDL_FRect srcrect;
 	SDL_FRect dstrect;
-	float x;
-	float y;
 };

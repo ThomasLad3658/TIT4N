@@ -16,6 +16,7 @@ Game::Game(){
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 	}
 	background = new Background(renderer, "assets/backgrounds/test.png");
+	background->setPosition(100.0f, 100.0f);
 }
 
 Game::~Game(){

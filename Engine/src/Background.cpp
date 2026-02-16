@@ -22,3 +22,8 @@ bool Background::present()
 	}
 	else return true;
 }
+
+void Background::setPosition(float x, float y){
+	dstrect.x = x;
+	dstrect.y = y;
+}
