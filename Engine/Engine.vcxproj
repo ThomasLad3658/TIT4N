@@ -114,7 +114,8 @@
       <AdditionalDependencies>lua54.lib;SDL3.lib;SDl3_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(ProjectDir)lib\x64\SDL*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)lib\x64\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)src\*.lua" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,7 +136,8 @@
       <AdditionalDependencies>lua54.lib;SDL3.lib;SDl3_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "$(ProjectDir)lib\x64\SDL*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)lib\x64\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y "$(ProjectDir)src\*.lua" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -273,6 +275,7 @@
   <ItemGroup>
     <None Include="lib\x64\SDL3.dll" />
     <None Include="lib\x64\SDL3_image.dll" />
+    <None Include="src\script.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
