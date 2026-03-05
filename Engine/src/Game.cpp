@@ -18,14 +18,13 @@ Game::Game(){
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Renderer creation failed");
 	}
-	background = new Background(renderer, "assets/backgrounds/test.png");
+	background = std::make_unique<Background>(renderer, "assets/backgrounds/test.png");
 	background->setPosition(100.0f, 100.0f);
 }
 
 Game::~Game(){
-	std::cout << "Cleaning Game...";
+	std::cout << "Cleaning Game...\n";
 
-	delete background;
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

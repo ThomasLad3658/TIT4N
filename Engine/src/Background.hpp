@@ -14,7 +14,6 @@ public:
 private:
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
-	const char* path;
 	SDL_FRect srcrect;
 	SDL_FRect dstrect;
 };
