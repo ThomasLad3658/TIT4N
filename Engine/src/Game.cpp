@@ -1,4 +1,6 @@
+#include <iostream>
 #include "Game.hpp"
+#include "Common.hpp"
 
 Game::Game(){
 	std::cout << "Initializing Game...\n";
@@ -7,7 +9,7 @@ Game::Game(){
 		throw std::runtime_error("SDL_Init failed");
 	}
 	
-	window = SDL_CreateWindow("TIT4N", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+	window = SDL_CreateWindow("TIT4N", WindowWidth, WindowHeight, 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
@@ -33,6 +35,7 @@ Game::~Game(){
 void Game::Run(){
 	std::cout << "Running Game...\n";
 
+	SDL_Event event;
 	running = true;
 
 	while (running) {

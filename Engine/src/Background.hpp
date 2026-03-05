@@ -1,12 +1,10 @@
 #pragma once
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include <iostream>
-#include "Common.hpp"
 
 class Background {
 public:
-	Background(SDL_Renderer* renderer, const char* path);
+	Background(SDL_Renderer* renderer, std::string_view path);
 	~Background();
 	bool present();
 	void setPosition(float x, float y);

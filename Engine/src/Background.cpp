@@ -1,14 +1,16 @@
+#include <SDL3_image/SDL_image.h>
 #include "Background.hpp"
+#include "Common.hpp"
 
-Background::Background(SDL_Renderer* renderer, const char* path) : 
+Background::Background(SDL_Renderer* renderer, std::string_view path) :
 	renderer(renderer) {
-	texture = IMG_LoadTexture(renderer, path);
+	texture = IMG_LoadTexture(renderer, path.data());
 	if (!texture) {
 		std::cerr << "Failed to load background texture : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("background texture loading failed");
 	}
-	srcrect = { 0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT };
-	dstrect = { 0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT };
+	srcrect = { 0.0f, 0.0f, WindowWidth, WindowHeight };
+	dstrect = { 0.0f, 0.0f, WindowWidth, WindowHeight };
 }
 
 Background::~Background(){
