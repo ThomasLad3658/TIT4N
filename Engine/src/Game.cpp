@@ -2,7 +2,7 @@
 
 Game::Game(){
 	std::cout << "Initializing Game...\n";
-	if (!SDL_Init(SDL_INIT_VIDEO || SDL_INIT_AUDIO)) {
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
 	}
 	
@@ -15,14 +15,13 @@ Game::Game(){
 	if (!renderer) {
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 	}
-	background = new Background(renderer, "assets/backgrounds/test.png");
+	background = std::make_unique<Background>(renderer, "assets/backgrounds/test.png");
 	background->setPosition(100.0f, 100.0f);
 }
 
 Game::~Game(){
-	std::cout << "Cleaning Game...";
+	std::cout << "Cleaning Game...\n";
 
-	delete background;
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
