@@ -5,6 +5,7 @@ Background::Background(SDL_Renderer* renderer, const char* path) :
 	texture = IMG_LoadTexture(renderer, path);
 	if (!texture) {
 		std::cerr << "Failed to load background texture : " << SDL_GetError() << std::endl;
+		throw std::runtime_error("background texture loading failed");
 	}
 	srcrect = { 0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT };
 	dstrect = { 0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT };
@@ -18,6 +19,7 @@ bool Background::present()
 {
 	if (!SDL_RenderTexture(renderer, texture, &srcrect, &dstrect)) {
 		std::cerr << "Failed to render background texture : " << SDL_GetError() << std::endl;
+		throw std::runtime_error("background texture rendering failed");
 		return false;
 	}
 	else return true;
