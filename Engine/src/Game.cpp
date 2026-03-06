@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "Game.hpp"
 #include "Common.hpp"
 
@@ -20,8 +21,16 @@ Game::Game(){
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Renderer creation failed");
 	}
-	background = std::make_unique<Background>(renderer, "assets/backgrounds/test.png");
-	background->setPosition(100.0f, 100.0f);
+
+	sceneManager = std::make_unique<SceneManager>();
+	renderSystem = std::make_unique<RenderSystem>();
+	physicsSystem = std::make_unique<PhysicsSystem>();
+	luaManager = std::make_unique<LuaManager>();
+
+	ServiceLocater::registerSceneManager(sceneManager.get());
+	ServiceLocater::registerRenderSystem(renderSystem.get());
+	ServiceLocater::registerPhysicsSystem(physicsSystem.get());
+	ServiceLocater::registerLuaManager(luaManager.get());
 }
 
 Game::~Game(){
@@ -49,7 +58,6 @@ void Game::Run(){
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
-		background->present();
 		SDL_RenderPresent(renderer);
 
 	}
