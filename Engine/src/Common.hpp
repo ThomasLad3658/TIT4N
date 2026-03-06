@@ -1,2 +1,3 @@
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+#pragma once
+constexpr int WindowWidth = 800;
+constexpr int WindowHeight = 600;

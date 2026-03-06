@@ -1,28 +1,32 @@
+#include <iostream>
 #include "Game.hpp"
+#include "Common.hpp"
 
 Game::Game(){
 	std::cout << "Initializing Game...\n";
-	if (!SDL_Init(SDL_INIT_VIDEO || SDL_INIT_AUDIO)) {
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
+		throw std::runtime_error("SDL_Init failed");
 	}
 	
-	window = SDL_CreateWindow("TIT4N", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+	window = SDL_CreateWindow("TIT4N", WindowWidth, WindowHeight, 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
+		throw std::runtime_error("Window creation failed");
 	}
 
 	renderer = SDL_CreateRenderer(window, NULL);
 	if (!renderer) {
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
+		throw std::runtime_error("Renderer creation failed");
 	}
-	background = new Background(renderer, "assets/backgrounds/test.png");
+	background = std::make_unique<Background>(renderer, "assets/backgrounds/test.png");
 	background->setPosition(100.0f, 100.0f);
 }
 
 Game::~Game(){
-	std::cout << "Cleaning Game...";
+	std::cout << "Cleaning Game...\n";
 
-	delete background;
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -31,6 +35,7 @@ Game::~Game(){
 void Game::Run(){
 	std::cout << "Running Game...\n";
 
+	SDL_Event event;
 	running = true;
 
 	while (running) {
