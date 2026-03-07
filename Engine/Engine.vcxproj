@@ -115,7 +115,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)lib\x64\*.dll" "$(OutDir)"</Command>
-      <Command>xcopy /y "$(ProjectDir)src\*.lua" "$(OutDir)"</Command>
+      <Command>xcopy /y /e /i "$(SolutionDir)Game" "$(OutDir)Game"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,7 +137,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)lib\x64\*.dll" "$(OutDir)"</Command>
-      <Command>xcopy /y "$(ProjectDir)src\*.lua" "$(OutDir)"</Command>
+      <Command>xcopy /y /e /i "$(SolutionDir)Game" "$(OutDir)Game"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

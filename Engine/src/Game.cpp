@@ -10,7 +10,7 @@ Game::Game(){
 		throw std::runtime_error("SDL_Init failed");
 	}
 	
-	window = SDL_CreateWindow("TIT4N", WindowWidth, WindowHeight, 0);
+	window = SDL_CreateWindow("", 0, 0, 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
@@ -27,10 +27,14 @@ Game::Game(){
 	physicsSystem = std::make_unique<PhysicsSystem>();
 	luaManager = std::make_unique<LuaManager>();
 
+	ServiceLocater::registerGame(this);
 	ServiceLocater::registerSceneManager(sceneManager.get());
 	ServiceLocater::registerRenderSystem(renderSystem.get());
 	ServiceLocater::registerPhysicsSystem(physicsSystem.get());
 	ServiceLocater::registerLuaManager(luaManager.get());
+
+	luaManager->registerFunctions();
+	luaManager->DoFile((std::string(SDL_GetBasePath()) + "Game/main.lua").c_str());
 }
 
 Game::~Game(){
@@ -61,4 +65,12 @@ void Game::Run(){
 		SDL_RenderPresent(renderer);
 
 	}
+}
+
+bool Game::SetWindowTitle(const char* title) {
+	return SDL_SetWindowTitle(window, title);
+}
+
+bool Game::SetWindowSize(int w, int h) {
+	return SDL_SetWindowSize(window, w, h);
 }
