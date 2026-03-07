@@ -33,14 +33,14 @@ void Entity::setPosition(float x, float y) {
 	dstrect.y = y;
 }
 
-SDL_FRect Entity::getDstRect() {
+SDL_FRect Entity::getDstRect() const {
 	return dstrect;
 }
 
-std::string Entity::getTag() {
+std::string Entity::getTag() const {
 	return tag;
 }
 
-unsigned char Entity::getRenderLayer() {
+unsigned char Entity::getRenderLayer() const {
 	return renderLayer;
 }

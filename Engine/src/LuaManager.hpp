@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "ServiceLocater.hpp"
+#include "ServiceLocator.hpp"
 extern "C" {
 #include <Lua/lua.h>
 #include <Lua/lualib.h>
@@ -11,7 +11,7 @@ class LuaManager{
 public:
 	LuaManager();
 	~LuaManager();
-	void registerFunctions();
+	void RegisterFunctions();
 	bool DoFile(const char* path);
 	static int lua_SetWindowTitle(lua_State* L);
 	static int lua_SetWindowSize(lua_State* L);

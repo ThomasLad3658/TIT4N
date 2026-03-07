@@ -1,4 +1,5 @@
 #include <SDL3_image/SDL_image.h>
+#include <iostream>
 #include "Background.hpp"
 #include "Common.hpp"
 
@@ -9,22 +10,20 @@ Background::Background(SDL_Renderer* renderer, std::string_view path) :
 		std::cerr << "Failed to load background texture : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("background texture loading failed");
 	}
-	srcrect = { 0.0f, 0.0f, WindowWidth, WindowHeight };
-	dstrect = { 0.0f, 0.0f, WindowWidth, WindowHeight };
+	srcrect = { 0.0f, 0.0f, kWindowWidth, kWindowHeight };
+	dstrect = { 0.0f, 0.0f, kWindowWidth, kWindowHeight };
 }
 
 Background::~Background(){
 	SDL_DestroyTexture(texture);
 }
 
-bool Background::present()
+void Background::present()
 {
 	if (!SDL_RenderTexture(renderer, texture, &srcrect, &dstrect)) {
 		std::cerr << "Failed to render background texture : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("background texture rendering failed");
-		return false;
 	}
-	else return true;
 }
 
 void Background::setPosition(float x, float y){

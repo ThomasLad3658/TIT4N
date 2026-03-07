@@ -150,7 +150,7 @@
     <ClCompile Include="src\PhysicsSystem.cpp" />
     <ClCompile Include="src\RenderSystem.cpp" />
     <ClCompile Include="src\SceneManager.cpp" />
-    <ClCompile Include="src\ServiceLocater.cpp" />
+    <ClCompile Include="src\ServiceLocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Lua\lapi.h" />
@@ -274,7 +274,7 @@
     <ClInclude Include="src\PhysicsSystem.hpp" />
     <ClInclude Include="src\RenderSystem.hpp" />
     <ClInclude Include="src\SceneManager.hpp" />
-    <ClInclude Include="src\ServiceLocater.hpp" />
+    <ClInclude Include="src\ServiceLocator.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\backgrounds\test.png" />

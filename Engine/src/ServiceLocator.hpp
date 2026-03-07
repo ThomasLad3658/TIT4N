@@ -6,7 +6,7 @@ class RenderSystem;
 class PhysicsSystem;
 class LuaManager;
 
-class ServiceLocater {
+class ServiceLocator {
 public:
 	static void registerGame(Game* g);
 	static void registerSceneManager(SceneManager* sm);

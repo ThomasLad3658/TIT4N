@@ -10,7 +10,7 @@ Game::Game(){
 		throw std::runtime_error("SDL_Init failed");
 	}
 	
-	window = SDL_CreateWindow("", 0, 0, 0);
+	window = SDL_CreateWindow("", kWindowWidth, kWindowHeight, 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
@@ -27,14 +27,19 @@ Game::Game(){
 	physicsSystem = std::make_unique<PhysicsSystem>();
 	luaManager = std::make_unique<LuaManager>();
 
-	ServiceLocater::registerGame(this);
-	ServiceLocater::registerSceneManager(sceneManager.get());
-	ServiceLocater::registerRenderSystem(renderSystem.get());
-	ServiceLocater::registerPhysicsSystem(physicsSystem.get());
-	ServiceLocater::registerLuaManager(luaManager.get());
+	ServiceLocator::registerGame(this);
+	ServiceLocator::registerSceneManager(sceneManager.get());
+	ServiceLocator::registerRenderSystem(renderSystem.get());
+	ServiceLocator::registerPhysicsSystem(physicsSystem.get());
+	ServiceLocator::registerLuaManager(luaManager.get());
 
-	luaManager->registerFunctions();
-	luaManager->DoFile((std::string(SDL_GetBasePath()) + "Game/main.lua").c_str());
+	luaManager->RegisterFunctions();
+	const char* basePath = SDL_GetBasePath();
+	if (!basePath) {
+		throw std::runtime_error("SDL_GetBasePath() failed");
+	}
+	luaManager->DoFile((std::string(basePath) + "Game/main.lua").c_str());
+
 }
 
 Game::~Game(){

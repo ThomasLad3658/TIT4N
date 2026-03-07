@@ -1,3 +1,3 @@
 #pragma once
-constexpr int WindowWidth = 800;
-constexpr int WindowHeight = 600;
+constexpr int kWindowWidth = 800;
+constexpr int kWindowHeight = 600;

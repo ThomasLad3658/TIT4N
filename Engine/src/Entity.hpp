@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <iostream>
+#include <string_view>
 
 class Entity {
 public:
@@ -8,9 +9,9 @@ public:
 	~Entity();
 	bool present();
 	void setPosition(float x, float y);
-	SDL_FRect getDstRect();
-	std::string getTag();
-	unsigned char getRenderLayer();
+	SDL_FRect getDstRect() const;
+	std::string getTag() const;
+	unsigned char getRenderLayer() const;
 
 protected:
 	SDL_Renderer* renderer;
