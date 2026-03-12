@@ -3,6 +3,14 @@
 #include "Game.hpp"
 #include "Common.hpp"
 
+static bool Lua_SetWindowTitle(const char* title) {
+	return ServiceLocator::getGame()->SetWindowTitle(title);
+}
+
+static bool Lua_SetWindowSize(int w, int h) {
+	return ServiceLocator::getGame()->SetWindowSize(w, h);
+}
+
 Game::Game(){
 	std::cout << "Initializing Game...\n";
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
@@ -33,7 +41,9 @@ Game::Game(){
 	ServiceLocator::registerPhysicsSystem(physicsSystem.get());
 	ServiceLocator::registerLuaManager(luaManager.get());
 
-	luaManager->RegisterFunctions();
+	luaManager->RegisterFunction(&Lua_SetWindowTitle, "SetWindowTitle");
+	luaManager->RegisterFunction(&Lua_SetWindowSize, "SetWindowSize");
+
 	const char* basePath = SDL_GetBasePath();
 	if (!basePath) {
 		throw std::runtime_error("SDL_GetBasePath() failed");
