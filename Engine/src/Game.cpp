@@ -10,7 +10,7 @@ Game::Game(){
 		throw std::runtime_error("SDL_Init failed");
 	}
 	
-	window = SDL_CreateWindow("", kWindowWidth, kWindowHeight, 0);
+	window = SDL_CreateWindow("", static_cast<int>(kWindowWidth), static_cast<int>(kWindowHeight), 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
@@ -67,7 +67,7 @@ void Game::Run(){
 			}
 		}
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		SDL_RenderPresent(renderer);
 

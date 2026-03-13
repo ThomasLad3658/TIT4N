@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <memory>
 #include <type_traits>
 #include "ServiceLocator.hpp"
 extern "C" {
@@ -20,7 +21,7 @@ private:
 	lua_State* L = nullptr;
 	template <typename R, typename O, typename... Args, size_t... I>
 	void RegisterHelper(O* obj, R(O::*func)(Args...), std::index_sequence<I...>, const char *name);
-	std::vector<void*>allocatedFuncPtrs;
+	std::vector<std::shared_ptr<void>>allocatedFuncPtrs;
 };
 
 template <typename T>
@@ -60,11 +61,11 @@ template <>
 void lua_push<const char*>(lua_State* L, const char* value);
 
 template <typename R, typename O, typename... Args, size_t... I>
-void LuaManager::RegisterHelper(O* obj, R(O::*func)(Args...), std::index_sequence<I...>, const char* name) {
-	auto* funcPtr = new auto(func);
+void LuaManager::RegisterHelper(O* obj, R(O:: * func)(Args...), std::index_sequence<I...>, const char* name) {
+	std::shared_ptr funcPtr = std::make_shared<R(O::*)(Args...)>(func);
 	allocatedFuncPtrs.push_back(funcPtr);
 	lua_pushlightuserdata(L, reinterpret_cast<void*>(obj));
-	lua_pushlightuserdata(L, reinterpret_cast<void*>(funcPtr));
+	lua_pushlightuserdata(L, reinterpret_cast<void*>(funcPtr.get()));
 	lua_pushcclosure(L, [](lua_State* L) -> int {
 		auto obj = reinterpret_cast<O*>(lua_touserdata(L, lua_upvalueindex(1)));
 		auto func = reinterpret_cast<R(O::**)(Args...)>(lua_touserdata(L, lua_upvalueindex(2)));

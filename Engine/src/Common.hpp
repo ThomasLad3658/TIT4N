@@ -1,3 +1,3 @@
 #pragma once
-constexpr int kWindowWidth = 800;
-constexpr int kWindowHeight = 600;
+constexpr float kWindowWidth = 800.0f;
+constexpr float kWindowHeight = 600.0f;
