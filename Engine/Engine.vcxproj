@@ -115,7 +115,7 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)lib\x64\*.dll" "$(OutDir)"</Command>
-      <Command>xcopy /y "$(ProjectDir)src\*.lua" "$(OutDir)"</Command>
+      <Command>xcopy /y /e /i "$(SolutionDir)Game" "$(OutDir)Game"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,14 +137,20 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /y "$(ProjectDir)lib\x64\*.dll" "$(OutDir)"</Command>
-      <Command>xcopy /y "$(ProjectDir)src\*.lua" "$(OutDir)"</Command>
+      <Command>xcopy /y /e /i "$(SolutionDir)Game" "$(OutDir)Game"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Background.cpp" />
     <ClCompile Include="src\Common.hpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\LuaManager.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\PhysicsSystem.cpp" />
+    <ClCompile Include="src\RenderSystem.cpp" />
+    <ClCompile Include="src\SceneManager.cpp" />
+    <ClCompile Include="src\ServiceLocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Lua\lapi.h" />
@@ -263,6 +269,12 @@
     <ClInclude Include="include\SDL3_image\SDL_image.h" />
     <ClInclude Include="src\Background.hpp" />
     <ClInclude Include="src\Game.hpp" />
+    <ClInclude Include="src\Entity.hpp" />
+    <ClInclude Include="src\LuaManager.hpp" />
+    <ClInclude Include="src\PhysicsSystem.hpp" />
+    <ClInclude Include="src\RenderSystem.hpp" />
+    <ClInclude Include="src\SceneManager.hpp" />
+    <ClInclude Include="src\ServiceLocator.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\backgrounds\test.png" />
@@ -273,9 +285,9 @@
     <Library Include="lib\x64\SDL3_image.lib" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="lib\x64\Lua.dll" />
     <None Include="lib\x64\SDL3.dll" />
     <None Include="lib\x64\SDL3_image.dll" />
-    <None Include="src\script.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

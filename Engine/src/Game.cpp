@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "Game.hpp"
 #include "Common.hpp"
 
@@ -9,7 +10,7 @@ Game::Game(){
 		throw std::runtime_error("SDL_Init failed");
 	}
 	
-	window = SDL_CreateWindow("TIT4N", WindowWidth, WindowHeight, 0);
+	window = SDL_CreateWindow("", static_cast<int>(kWindowWidth), static_cast<int>(kWindowHeight), 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
@@ -20,8 +21,27 @@ Game::Game(){
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Renderer creation failed");
 	}
-	background = std::make_unique<Background>(renderer, "assets/backgrounds/test.png");
-	background->setPosition(100.0f, 100.0f);
+
+	sceneManager = std::make_unique<SceneManager>();
+	renderSystem = std::make_unique<RenderSystem>();
+	physicsSystem = std::make_unique<PhysicsSystem>();
+	luaManager = std::make_unique<LuaManager>();
+
+	ServiceLocator::registerGame(this);
+	ServiceLocator::registerSceneManager(sceneManager.get());
+	ServiceLocator::registerRenderSystem(renderSystem.get());
+	ServiceLocator::registerPhysicsSystem(physicsSystem.get());
+	ServiceLocator::registerLuaManager(luaManager.get());
+
+	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
+	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
+
+	const char* basePath = SDL_GetBasePath();
+	if (!basePath) {
+		throw std::runtime_error("SDL_GetBasePath() failed");
+	}
+	luaManager->DoFile((std::string(basePath) + "Game/main.lua").c_str());
+
 }
 
 Game::~Game(){
@@ -47,10 +67,17 @@ void Game::Run(){
 			}
 		}
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
-		background->present();
 		SDL_RenderPresent(renderer);
 
 	}
+}
+
+bool Game::SetWindowTitle(const char* title) {
+	return SDL_SetWindowTitle(window, title);
+}
+
+bool Game::SetWindowSize(int w, int h) {
+	return SDL_SetWindowSize(window, w, h);
 }

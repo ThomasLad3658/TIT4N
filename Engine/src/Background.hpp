@@ -1,12 +1,12 @@
 #pragma once
 #include <SDL3/SDL.h>
-#include <iostream>
+#include <string_view>
 
 class Background {
 public:
 	Background(SDL_Renderer* renderer, std::string_view path);
 	~Background();
-	bool present();
+	void present();
 	void setPosition(float x, float y);
 
 private:
