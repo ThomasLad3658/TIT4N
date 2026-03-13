@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 #include <type_traits>
 #include "ServiceLocator.hpp"
 extern "C" {
@@ -12,13 +13,14 @@ class LuaManager{
 public:
 	LuaManager();
 	~LuaManager();
-	template <typename R, typename... Args>
-	void RegisterFunction(R(*func)(Args...), const char* name);
+	template <typename R, typename O, typename... Args>
+	void RegisterFunction(O* obj, R(O::*func)(Args...), const char* name);
 	bool DoFile(const char* path);
 private:
 	lua_State* L = nullptr;
-	template <typename R, typename... Args, size_t... I>
-	void RegisterHelper(R(*func)(Args...), std::index_sequence<I...>, const char *name);
+	template <typename R, typename O, typename... Args, size_t... I>
+	void RegisterHelper(O* obj, R(O::*func)(Args...), std::index_sequence<I...>, const char *name);
+	std::vector<void*>allocatedFuncPtrs;
 };
 
 template <typename T>
@@ -57,25 +59,29 @@ void lua_push<bool>(lua_State* L, bool value);
 template <>
 void lua_push<const char*>(lua_State* L, const char* value);
 
-template <typename R, typename... Args, size_t... I>
-void LuaManager::RegisterHelper(R(*func)(Args...), std::index_sequence<I...>, const char* name) {
-	lua_pushlightuserdata(L, reinterpret_cast<void*>(func));
+template <typename R, typename O, typename... Args, size_t... I>
+void LuaManager::RegisterHelper(O* obj, R(O::*func)(Args...), std::index_sequence<I...>, const char* name) {
+	auto* funcPtr = new auto(func);
+	allocatedFuncPtrs.push_back(funcPtr);
+	lua_pushlightuserdata(L, reinterpret_cast<void*>(obj));
+	lua_pushlightuserdata(L, reinterpret_cast<void*>(funcPtr));
 	lua_pushcclosure(L, [](lua_State* L) -> int {
-		R(*func)(Args...) = reinterpret_cast<R(*)(Args...)>(lua_touserdata(L, lua_upvalueindex(1)));
+		auto obj = reinterpret_cast<O*>(lua_touserdata(L, lua_upvalueindex(1)));
+		auto func = reinterpret_cast<R(O::**)(Args...)>(lua_touserdata(L, lua_upvalueindex(2)));
 		if constexpr (std::is_void_v<R>) {
-			func(lua_get<Args>(L, I + 1)...);
+			(obj->*(*func))(lua_get<Args>(L, I + 1)...);
 			return 0;
 		}
 		else {
-			R rvalue = func(lua_get<Args>(L, I + 1)...);
+			R rvalue = (obj->*(*func))(lua_get<Args>(L, I + 1)...);
 			lua_push(L, rvalue);
 			return 1;
 		}
-		}, 1);
+	}, 2);
 	lua_setglobal(L, name);
 }
 
-template <typename R, typename... Args>
-void LuaManager::RegisterFunction(R(*func)(Args...), const char* name) {
-	RegisterHelper(func, std::make_index_sequence<sizeof...(Args)>{}, name);
+template <typename R, typename O, typename... Args>
+void LuaManager::RegisterFunction(O* obj, R(O::*func)(Args...), const char* name) {
+	RegisterHelper(obj, func, std::make_index_sequence<sizeof...(Args)>{}, name);
 }

@@ -63,6 +63,9 @@ LuaManager::LuaManager() {
 }
 
 LuaManager::~LuaManager() {
+	for (auto* ptr : allocatedFuncPtrs) {
+		delete ptr;
+	}
 	lua_close(L);
 }
 
