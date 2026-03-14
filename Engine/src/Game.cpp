@@ -58,6 +58,15 @@ void Game::Run(){
 	SDL_Event event;
 	running = true;
 
+	// ******************** TEST ********************
+
+	std::string path = std::string(basePath) + "Game/assets/sprites/player/Soldier.png";
+	SDL_FRect src = { 0.0f, 0.0f, 100.0f, 100.0f };
+	SDL_FRect dst = { 0.0f, 0.0f, 100.0f, 100.0f };
+	Entity* entity = new Entity(renderer, path, src, dst);
+
+	// ******************** TEST ********************
+
 	while (running) {
 		while(SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -69,6 +78,13 @@ void Game::Run(){
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
+
+		// ******************** TEST ********************
+
+		entity->present();
+
+		// ******************** TEST ********************
+
 		SDL_RenderPresent(renderer);
 
 	}
