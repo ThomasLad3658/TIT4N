@@ -3,22 +3,14 @@
 #include "Game.hpp"
 #include "Common.hpp"
 
-static bool Lua_SetWindowTitle(const char* title) {
-	return ServiceLocator::getGame()->SetWindowTitle(title);
-}
-
-static bool Lua_SetWindowSize(int w, int h) {
-	return ServiceLocator::getGame()->SetWindowSize(w, h);
-}
-
-Game::Game() {
+Game::Game(){
 	std::cout << "Initializing Game...\n";
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("SDL_Init failed");
 	}
 	
-	window = SDL_CreateWindow("", kWindowWidth, kWindowHeight, 0);
+	window = SDL_CreateWindow("", static_cast<int>(kWindowWidth), static_cast<int>(kWindowHeight), 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
@@ -43,8 +35,8 @@ Game::Game() {
 	ServiceLocator::registerPhysicsSystem(physicsSystem.get());
 	ServiceLocator::registerLuaManager(luaManager.get());
 
-	luaManager->RegisterFunction(&Lua_SetWindowTitle, "SetWindowTitle");
-	luaManager->RegisterFunction(&Lua_SetWindowSize, "SetWindowSize");
+	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
+	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 
 	const char* basePath = SDL_GetBasePath();
 	if (!basePath) {

@@ -2,9 +2,10 @@
 #include "Entity.hpp"
 #include "Common.hpp"
 
-Entity::Entity(SDL_Renderer* renderer, std::string_view path, SDL_FRect* src, SDL_FRect* dst) :
-	renderer(renderer), srcrect(*src), dstrect(*dst) {
+Entity::Entity(SDL_Renderer* renderer, std::string_view path, const SDL_FRect& src, const SDL_FRect& dst) :
+	renderer(renderer), srcrect(src), dstrect(dst) {
 	texture = IMG_LoadTexture(renderer, path.data());
+	tag = "none";
 	if (!texture) {
 		std::cerr << "Failed to load entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("entity texture loading failed");
@@ -18,14 +19,12 @@ Entity::~Entity() {
 	SDL_DestroyTexture(texture);
 }
 
-bool Entity::present()
+void Entity::present()
 {
 	if (!SDL_RenderTexture(renderer, texture, &srcrect, &dstrect)) {
 		std::cerr << "Failed to render entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("entity texture rendering failed");
-		return false;
 	}
-	else return true;
 }
 
 void Entity::setPosition(float x, float y) {
