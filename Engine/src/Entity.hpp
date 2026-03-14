@@ -19,6 +19,7 @@ protected:
 	SDL_Texture* texture;
 	SDL_FRect srcrect;
 	SDL_FRect dstrect;
+	SDL_FRect hitbox;
 	std::string tag;
 	unsigned char renderLayer;
 	bool isStatic;

@@ -1,6 +1,5 @@
 #include <SDL3_image/SDL_image.h>
 #include "Entity.hpp"
-#include "Common.hpp"
 
 Entity::Entity(SDL_Renderer* renderer, std::string_view path, const SDL_FRect& src, const SDL_FRect& dst) :
 	renderer(renderer), srcrect(src), dstrect(dst) {
