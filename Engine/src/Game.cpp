@@ -3,24 +3,26 @@
 #include "Game.hpp"
 #include "Common.hpp"
 
-Game::Game(){
+Game::Game() {
 	std::cout << "Initializing Game...\n";
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("SDL_Init failed");
 	}
-	
+
 	window = SDL_CreateWindow("", static_cast<int>(kWindowWidth), static_cast<int>(kWindowHeight), 0);
 	if (!window) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
 	}
 
-	renderer = SDL_CreateRenderer(window, NULL);
-	if (!renderer) {
+	SDL_Renderer* sdlRenderer = SDL_CreateRenderer(window, NULL);
+	if (!sdlRenderer) {
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Renderer creation failed");
 	}
+
+	renderer = RenderSystem(sdlRenderer);
 
 	sceneManager = std::make_unique<SceneManager>();
 	renderSystem = std::make_unique<RenderSystem>();
@@ -44,33 +46,27 @@ Game::Game(){
 
 }
 
-Game::~Game(){
+Game::~Game() {
 	std::cout << "Cleaning Game...\n";
-
-	SDL_DestroyRenderer(renderer);
+	renderer.destroy();
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
 
-void Game::Run(){
+void Game::Run() {
 	std::cout << "Running Game...\n";
 
 	SDL_Event event;
 	running = true;
-
 	while (running) {
-		while(SDL_PollEvent(&event)) {
+		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_EVENT_QUIT:
 				running = false;
 				break;
 			}
 		}
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
-		SDL_RenderPresent(renderer);
-
+		renderer.render();
 	}
 }
 
