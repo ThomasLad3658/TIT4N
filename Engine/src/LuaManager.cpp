@@ -2,7 +2,9 @@
 #include "Game.hpp"
 
 template <typename T>
-T lua_get(lua_State* L, int index);
+T lua_get(lua_State* L, int index) {
+	//
+}
 
 template<>
 int lua_get<int>(lua_State* L, int index) {
@@ -30,7 +32,9 @@ const char* lua_get<const char*>(lua_State* L, int index) {
 }
 
 template <typename T>
-void lua_push(lua_State* L, T value);
+void lua_push(lua_State* L, T value) {
+	//
+}
 
 template <>
 void lua_push<int>(lua_State* L, int value) {

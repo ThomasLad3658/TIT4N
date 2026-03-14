@@ -1,13 +1,14 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <iostream>
+#include <string>
 #include <string_view>
 
 class Entity {
 public:
-	Entity(SDL_Renderer* renderer, std::string_view path, SDL_FRect* src, SDL_FRect* dst);
+	Entity(SDL_Renderer* renderer, std::string_view path, const SDL_FRect& src, const SDL_FRect& dst);
 	~Entity();
-	bool present();
+	void present();
 	void setPosition(float x, float y);
 	SDL_FRect getDstRect() const;
 	std::string getTag() const;
