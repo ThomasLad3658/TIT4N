@@ -11,7 +11,7 @@ static bool Lua_SetWindowSize(int w, int h) {
 	return ServiceLocator::getGame()->SetWindowSize(w, h);
 }
 
-Game::Game(){
+Game::Game() {
 	std::cout << "Initializing Game...\n";
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
@@ -24,11 +24,13 @@ Game::Game(){
 		throw std::runtime_error("Window creation failed");
 	}
 
-	renderer = SDL_CreateRenderer(window, NULL);
-	if (!renderer) {
+	SDL_Renderer* sdlRenderer = SDL_CreateRenderer(window, NULL);
+	if (!sdlRenderer) {
 		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Renderer creation failed");
 	}
+
+	renderer = RenderSystem(sdlRenderer);
 
 	sceneManager = std::make_unique<SceneManager>();
 	renderSystem = std::make_unique<RenderSystem>();
@@ -54,8 +56,7 @@ Game::Game(){
 
 Game::~Game(){
 	std::cout << "Cleaning Game...\n";
-
-	SDL_DestroyRenderer(renderer);
+	renderer.destroy();
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
@@ -65,7 +66,6 @@ void Game::Run(){
 
 	SDL_Event event;
 	running = true;
-
 	while (running) {
 		while(SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -74,11 +74,7 @@ void Game::Run(){
 				break;
 			}
 		}
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		SDL_RenderClear(renderer);
-		SDL_RenderPresent(renderer);
-
+		renderer.render();
 	}
 }
 
