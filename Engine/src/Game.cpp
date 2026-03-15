@@ -16,12 +16,9 @@ Game::Game() {
 	}
 	
 	window = nullptr;
-	renderer = nullptr;
 	windowTitle = "";
 	windowWidth = 0;
 	windowHeight = 0;
-
-	renderer = RenderSystem(sdlRenderer);
 
 	sceneManager = std::make_unique<SceneManager>();
 	renderSystem = std::make_unique<RenderSystem>();
@@ -38,7 +35,6 @@ Game::Game() {
 
 Game::~Game() {
 	std::cout << "Cleaning Game...\n";
-	renderer.destroy();
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
@@ -55,6 +51,10 @@ void Game::Run() {
 		throw std::runtime_error("SDL_GetBasePath() failed");
 	}
 	luaManager->DoFile((std::string(basePath) + "Game/main.lua").c_str());
+	if (!window) {
+		std::cerr << "Window isn't initialized" << std::endl;
+		throw std::runtime_error("Window wasn't created yet");
+	}
 
 	SDL_Event event;
 	running = true;
@@ -66,7 +66,7 @@ void Game::Run() {
 				break;
 			}
 		}
-		renderer.render();
+		renderSystem->render();
 	}
 }
 
@@ -79,14 +79,7 @@ void Game::CreateWindow(const char* title, int width, int height) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
 	}
-
-	renderer = SDL_CreateRenderer(window, NULL);
-	if (!renderer) {
-		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
-		throw std::runtime_error("Renderer creation failed");
-	}
-	
-	SDL_SetDefaultTextureScaleMode(renderer, SDL_SCALEMODE_PIXELART);
+	renderSystem->Init(window);
 }
 
 bool Game::SetWindowTitle(const char* title) {

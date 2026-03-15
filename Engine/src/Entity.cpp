@@ -12,6 +12,7 @@ Entity::Entity(SDL_Renderer* renderer, std::string_view path, const SDL_FRect& s
 	renderLayer = 0;
 	isStatic = true;
 	hasScript = true;
+	hitbox = { 0.0f, 0.0f , 0.0f , 0.0f };
 }
 
 Entity::~Entity() {
