@@ -1,7 +1,8 @@
 #include <SDL3_image/SDL_image.h>
 #include <iostream>
 #include "Background.hpp"
-#include "Common.hpp"
+#include "Game.hpp"
+#include "ServiceLocator.hpp"
 
 Background::Background(SDL_Renderer* renderer, std::string_view path) :
 	renderer(renderer) {
@@ -10,8 +11,12 @@ Background::Background(SDL_Renderer* renderer, std::string_view path) :
 		std::cerr << "Failed to load background texture : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("background texture loading failed");
 	}
-	srcrect = { 0.0f, 0.0f, kWindowWidth, kWindowHeight };
-	dstrect = { 0.0f, 0.0f, kWindowWidth, kWindowHeight };
+
+	int w, h;
+	ServiceLocator::getGame()->getWindowSize(&w, &h);
+	srcrect = { 0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h) };
+	dstrect = { 0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h) };
+
 }
 
 Background::~Background(){

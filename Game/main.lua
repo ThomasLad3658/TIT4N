@@ -1,2 +1,1 @@
-SetWindowTitle("TIT4N")
-SetWindowSize(800, 600)
+CreateWindow("TIT4N", 800, 700)
