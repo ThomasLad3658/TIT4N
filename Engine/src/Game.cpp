@@ -55,8 +55,6 @@ void Game::Run(){
 	}
 	luaManager->DoFile((std::string(basePath) + "Game/main.lua").c_str());
 
-	std::cout << "Lua function says 2 + 3 = " << luaManager->callFunction<int>("add", 2, 3) << std::endl;
-
 	SDL_Event event;
 	running = true;
 

@@ -4,6 +4,7 @@
 #include <memory>
 #include <type_traits>
 #include "ServiceLocator.hpp"
+#include "Common.hpp"
 extern "C" {
 #include <Lua/lua.h>
 #include <Lua/lualib.h>
@@ -19,6 +20,8 @@ public:
 	bool DoFile(const char* path);
 	template <typename T, typename... Args>
 	T callFunction(const char* name, Args... args);
+	template <typename T>
+	T GetVariable(const char* name);
 private:
 	lua_State* L = nullptr;
 	template <typename R, typename O, typename... Args, size_t... I>
@@ -109,4 +112,21 @@ T LuaManager::callFunction(const char* name, Args... args) {
 		}
 		return T{};
 	}
+}
+
+template <typename T>
+T LuaManager::GetVariable(const char* name) {
+	lua_getglobal(L, name);
+	T value = lua_get<T>(L, -1);
+	lua_pop(L, 1);
+	return value;
+}
+
+template <typename... Args>
+void GetTable(lua_State* L, const char* name, Args... args, int index) {
+	lua_getglobal(L, name);
+	if (lua_istable(L, index)) {
+		lua_getfield(L, index, args.name);
+
+	}...
 }
