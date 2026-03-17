@@ -55,15 +55,19 @@ void Game::Run(){
 	}
 	luaManager->DoFile((std::string(basePath) + "Game/main.lua").c_str());
 
+	std::cout << "Lua function says 2 + 3 = " << luaManager->callFunction<int>("add", 2, 3) << std::endl;
+
 	SDL_Event event;
 	running = true;
 
 	// ******************** TEST ********************
 
-	std::string path = std::string(basePath) + "Game/assets/sprites/player/Soldier.png";
-	SDL_FRect src = { 0.0f, 0.0f, 100.0f, 100.0f };
-	SDL_FRect dst = { 0.0f, 0.0f, 100.0f, 100.0f };
-	Entity* entity = new Entity(renderer, path, src, dst);
+	Entity* entity = new Entity(
+		renderer, 
+		std::string(basePath) + "Game/assets/sprites/player/Soldier.png",
+		{ 0.0f, 0.0f, 100.0f, 100.0f },
+		{ 0.0f, 0.0f, 500.0f, 500.0f }
+	);
 
 	// ******************** TEST ********************
 
