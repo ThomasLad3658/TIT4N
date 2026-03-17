@@ -31,7 +31,7 @@ bool RenderSystem::render() {
 
 	for (unsigned char i = 0; i < 255; i++) {
 		if (renderLayers.find(i) != renderLayers.end()) {
-			for (unsigned int j = 0; i < renderLayers[i].size(); j++) { // Little logic problem here. Not very urgent
+			for (unsigned int j = 0; i < renderLayers[i].size(); j++) {
 				renderLayers[i][j]->present();
 			}
 		}
@@ -50,15 +50,21 @@ bool RenderSystem::registerEntity(Entity* entity) {
 }
 
 bool RenderSystem::isEntityRegistered(Entity* entity) {
-	// Returns true if the entity is found, false otherwise
-	auto it = std::find(entities.begin(), entities.end(), entity); // std::find() will not work. Find yourself why. Consult me for solution
-	return it != entities.end();
+	for (const auto& e : entities) {
+		if (e->getId() == entity->getId()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 bool RenderSystem::unregisterEntity(Entity* entity) {
 	// Returns true if the entity was found and removed, false otherwise
-	auto it = std::find(entities.begin(), entities.end(), entity); // std::find() will not work. Find yourself why. Consult me for solution
-	if (it == entities.end()) return false;
-	entities.erase(it);
-	return true;
+	for (auto it = entities.begin(); it != entities.end(); ++it) {
+		if ((*it)->getId() == entity->getId()) {
+			entities.erase(it);
+			return true;
+		}
+	}
+	return false;
 }

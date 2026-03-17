@@ -2,7 +2,9 @@
 #include "Entity.hpp"
 
 Entity::Entity(SDL_Renderer* renderer, std::string_view path, const SDL_FRect& src, const SDL_FRect& dst) :
-	renderer(renderer), srcrect(src), dstrect(dst) {
+	renderer(renderer), srcrect(src), dstrect(dst), id(nextId)
+{
+	nextId++;
 	texture = IMG_LoadTexture(renderer, path.data());
 	tag = "none";
 	if (!texture) {
@@ -42,4 +44,8 @@ std::string Entity::getTag() const {
 
 unsigned char Entity::getRenderLayer() const {
 	return renderLayer;
+}
+
+unsigned int Entity::getId() {
+	return id;
 }

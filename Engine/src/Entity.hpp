@@ -13,6 +13,7 @@ public:
 	SDL_FRect getDstRect() const;
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;
+	unsigned int getId();
 
 protected:
 	SDL_Renderer* renderer;
@@ -24,4 +25,6 @@ protected:
 	unsigned char renderLayer;
 	bool isStatic;
 	bool hasScript;
+	unsigned int id;
+	static inline unsigned int nextId = 0;
 };
