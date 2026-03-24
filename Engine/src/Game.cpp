@@ -56,6 +56,13 @@ void Game::Run() {
 		throw std::runtime_error("Window wasn't created yet");
 	}
 
+	Entity* entity = new Entity(
+		std::string(basePath) + "Game/assets/sprites/player/Soldier.png",
+		{ 0.0f, 0.0f, 100.0f, 100.0f },
+		{ 0.0f, 0.0f, 500.0f, 500.0f }
+	);
+	renderSystem->registerEntity(entity);
+
 	SDL_Event event;
 	running = true;
 	while (running) {

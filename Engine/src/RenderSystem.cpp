@@ -1,4 +1,5 @@
 #include "RenderSystem.hpp"
+#include <map>
 
 RenderSystem::RenderSystem() {
 	renderer = nullptr;
@@ -31,7 +32,7 @@ bool RenderSystem::render() {
 
 	for (unsigned char i = 0; i < 255; i++) {
 		if (renderLayers.find(i) != renderLayers.end()) {
-			for (unsigned int j = 0; i < renderLayers[i].size(); j++) {
+			for (unsigned int j = 0; j < renderLayers[i].size(); j++) {
 				renderLayers[i][j]->present();
 			}
 		}
@@ -44,7 +45,7 @@ bool RenderSystem::render() {
 bool RenderSystem::registerEntity(Entity* entity) {
 	// Returns true if the entity has been successfuly registered, false if the entity was already registered
 	if (isEntityRegistered(entity)) return false;
-	entity->getRenderLayer();
+	if (!entity->isInitialized()) entity->Init(renderer);
 	entities.push_back(entity);
 	return true;
 }

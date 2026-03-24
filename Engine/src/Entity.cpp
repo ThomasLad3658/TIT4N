@@ -1,16 +1,15 @@
 #include <SDL3_image/SDL_image.h>
 #include "Entity.hpp"
 
-Entity::Entity(SDL_Renderer* renderer, std::string_view path, const SDL_FRect& src, const SDL_FRect& dst) :
-	renderer(renderer), srcrect(src), dstrect(dst), id(nextId)
+Entity::Entity(std::string path, const SDL_FRect& src, const SDL_FRect& dst) :
+	srcrect(src), dstrect(dst)
 {
-	nextId++;
-	texture = IMG_LoadTexture(renderer, path.data());
+	filepath = std::string(path.data());
+	id = nextId;
+	Entity::nextId++;
+	texture = nullptr;
+	renderer = nullptr;
 	tag = "none";
-	if (!texture) {
-		std::cerr << "Failed to load entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
-		throw std::runtime_error("entity texture loading failed");
-	}
 	renderLayer = 0;
 	isStatic = true;
 	hasScript = true;
@@ -18,15 +17,33 @@ Entity::Entity(SDL_Renderer* renderer, std::string_view path, const SDL_FRect& s
 }
 
 Entity::~Entity() {
-	SDL_DestroyTexture(texture);
+	if (initialized == true) {
+		SDL_DestroyTexture(texture);
+	}
 }
 
-void Entity::present()
+void Entity::Init(SDL_Renderer* sdlRenderer) {
+	renderer = sdlRenderer;
+	texture = IMG_LoadTexture(renderer, filepath.c_str());
+	if (!texture) {
+		std::cerr << "Failed to load entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
+		throw std::runtime_error("entity texture loading failed");
+	}
+	initialized = true;
+}
+
+bool Entity::isInitialized() const {
+	return initialized;
+}
+
+bool Entity::present()
 {
+	if (initialized == false) return false;
 	if (!SDL_RenderTexture(renderer, texture, &srcrect, &dstrect)) {
 		std::cerr << "Failed to render entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("entity texture rendering failed");
 	}
+	return true;
 }
 
 void Entity::setPosition(float x, float y) {

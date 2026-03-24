@@ -2,7 +2,6 @@
 #include <SDL3/SDL.h>
 #include "Entity.hpp"
 #include <vector>
-#include <map>
 
 class RenderSystem {
 public:
