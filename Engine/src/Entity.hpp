@@ -12,6 +12,7 @@ public:
 	bool present();
 	bool isInitialized() const;
 	void setPosition(float x, float y);
+	void setRenderLayer(char z);
 	SDL_FRect getDstRect() const;
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;

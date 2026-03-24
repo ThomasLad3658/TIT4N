@@ -51,6 +51,10 @@ void Entity::setPosition(float x, float y) {
 	dstrect.y = y;
 }
 
+void Entity::setRenderLayer(char z) {
+	renderLayer = z;
+}
+
 SDL_FRect Entity::getDstRect() const {
 	return dstrect;
 }
