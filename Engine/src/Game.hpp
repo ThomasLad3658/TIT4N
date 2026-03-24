@@ -23,7 +23,6 @@ public:
 private:
 	bool running = false;
 	SDL_Window* window;
-	RenderSystem renderer;
 	std::unique_ptr<SceneManager> sceneManager;
 	std::unique_ptr<RenderSystem> renderSystem;
 	std::unique_ptr<PhysicsSystem> physicsSystem;
