@@ -121,12 +121,30 @@ T LuaManager::GetVariable(const char* name) {
 	lua_pop(L, 1);
 	return value;
 }
-
+/*
+template <typename T, structVariable... Args, size_t... I>
+void TableHelper(lua_State* L, const char* name, Args... args, int index, std::index_sequence<I...>) {
+	lua_getfield(L, index, args1.name);
+	([&] {
+		lua_getfield(L, index, args.name);
+		*args.var = lua_get<T>(L, I + index);
+		lua_pop(L, 1);
+	}(args, I), ...);
+}
+*/
+/*
+GetTable( L,
+	{"name", *var},
+	{"name", *var},
+	1
+);
+*/
+/*
 template <typename... Args>
 void GetTable(lua_State* L, const char* name, Args... args, int index) {
 	lua_getglobal(L, name);
 	if (lua_istable(L, index)) {
-		lua_getfield(L, index, args.name);
-
-	}...
+		TableHelper(L, name, args..., index, std::make_index_sequence<sizeof...(args)>);
+	}
 }
+*/

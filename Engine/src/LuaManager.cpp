@@ -1,7 +1,7 @@
 #include "LuaManager.hpp"
 #include "Game.hpp"
 
-template <typename T>
+template <typename T, typename S>
 T lua_get(lua_State* L, int index) {
 	//
 }

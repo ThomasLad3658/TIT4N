@@ -90,6 +90,7 @@ void Game::Run(){
 		SDL_RenderPresent(renderer);
 
 	}
+	delete entity;
 }
 
 void Game::CreateWindow(const char* title, int width, int height) {
