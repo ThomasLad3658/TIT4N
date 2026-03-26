@@ -8,7 +8,7 @@
 #include "LuaManager.hpp"
 #include "Entity.hpp"
 
-Game::Game(){
+Game::Game() {
 	std::cout << "Initializing Game...\n";
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
 		std::cerr << "SDL initialization failed : " << SDL_GetError() << std::endl;
@@ -16,7 +16,6 @@ Game::Game(){
 	}
 	
 	window = nullptr;
-	renderer = nullptr;
 	windowTitle = "";
 	windowWidth = 0;
 	windowHeight = 0;
@@ -34,15 +33,13 @@ Game::Game(){
 
 }
 
-Game::~Game(){
+Game::~Game() {
 	std::cout << "Cleaning Game...\n";
-
-	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
 
-void Game::Run(){
+void Game::Run() {
 	std::cout << "Running Game...\n";
 
 	luaManager->RegisterFunction(this, &Game::CreateWindow, "CreateWindow");
@@ -54,27 +51,29 @@ void Game::Run(){
 		throw std::runtime_error("SDL_GetBasePath() failed");
 	}
 	luaManager->DoFile((std::string(basePath) + "Game/main.lua").c_str());
+	if (!window) {
+		std::cerr << "Window isn't initialized" << std::endl;
+		throw std::runtime_error("Window wasn't created yet");
+	}
+
+	Entity* entity = new Entity(
+		std::string(basePath) + "Game/assets/sprites/player/Soldier.png",
+		{ 0.0f, 0.0f, 100.0f, 100.0f },
+		{ 0.0f, 0.0f, 500.0f, 500.0f }
+	);
+	renderSystem->registerEntity(entity);
 
 	SDL_Event event;
 	running = true;
-
-	int variable;
-	int variable1;
-
 	while (running) {
-		while(SDL_PollEvent(&event)) {
+		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_EVENT_QUIT:
 				running = false;
 				break;
 			}
 		}
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
-
-		SDL_RenderPresent(renderer);
-
+		renderSystem->render();
 	}
 }
 
@@ -87,14 +86,7 @@ void Game::CreateWindow(const char* title, int width, int height) {
 		std::cerr << "Window creation failed : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("Window creation failed");
 	}
-
-	renderer = SDL_CreateRenderer(window, NULL);
-	if (!renderer) {
-		std::cerr << "Renderer creation failed : " << SDL_GetError() << std::endl;
-		throw std::runtime_error("Renderer creation failed");
-	}
-	
-	SDL_SetDefaultTextureScaleMode(renderer, SDL_SCALEMODE_PIXELART);
+	renderSystem->Init(window);
 }
 
 bool Game::SetWindowTitle(const char* title) {
