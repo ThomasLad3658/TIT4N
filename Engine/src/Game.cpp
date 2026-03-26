@@ -58,16 +58,8 @@ void Game::Run(){
 	SDL_Event event;
 	running = true;
 
-	// ******************** TEST ********************
-
-	Entity* entity = new Entity(
-		renderer, 
-		std::string(basePath) + "Game/assets/sprites/player/Soldier.png",
-		{ 0.0f, 0.0f, 100.0f, 100.0f },
-		{ 0.0f, 0.0f, 500.0f, 500.0f }
-	);
-
-	// ******************** TEST ********************
+	int variable;
+	int variable1;
 
 	while (running) {
 		while(SDL_PollEvent(&event)) {
@@ -81,16 +73,9 @@ void Game::Run(){
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-		// ******************** TEST ********************
-
-		entity->present();
-
-		// ******************** TEST ********************
-
 		SDL_RenderPresent(renderer);
 
 	}
-	delete entity;
 }
 
 void Game::CreateWindow(const char* title, int width, int height) {

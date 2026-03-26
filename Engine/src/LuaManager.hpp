@@ -22,6 +22,10 @@ public:
 	T callFunction(const char* name, Args... args);
 	template <typename T>
 	T GetVariable(const char* name);
+	void OpenTable(const char* name);
+	template <typename T>
+	void GetTable(T* var, const char* varName);
+	void PopStack(int n);
 private:
 	lua_State* L = nullptr;
 	template <typename R, typename O, typename... Args, size_t... I>
@@ -121,30 +125,12 @@ T LuaManager::GetVariable(const char* name) {
 	lua_pop(L, 1);
 	return value;
 }
-/*
-template <typename T, structVariable... Args, size_t... I>
-void TableHelper(lua_State* L, const char* name, Args... args, int index, std::index_sequence<I...>) {
-	lua_getfield(L, index, args1.name);
-	([&] {
-		lua_getfield(L, index, args.name);
-		*args.var = lua_get<T>(L, I + index);
+
+template <typename T>
+void LuaManager::GetTable(T* var, const char* varName) {
+	if (lua_istable(L, -1)) {
+		lua_getfield(L, -1, varName);
+		*var = lua_get<T>(L, -1);
 		lua_pop(L, 1);
-	}(args, I), ...);
-}
-*/
-/*
-GetTable( L,
-	{"name", *var},
-	{"name", *var},
-	1
-);
-*/
-/*
-template <typename... Args>
-void GetTable(lua_State* L, const char* name, Args... args, int index) {
-	lua_getglobal(L, name);
-	if (lua_istable(L, index)) {
-		TableHelper(L, name, args..., index, std::make_index_sequence<sizeof...(args)>);
 	}
 }
-*/

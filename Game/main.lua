@@ -1,3 +1,6 @@
 CreateWindow("TIT4N",  640, 360)
 
-var = 100
+table = {
+var = 100,
+var1 = 200
+}
