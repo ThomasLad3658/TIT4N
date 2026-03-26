@@ -4,6 +4,7 @@
 #include <memory>
 #include <type_traits>
 #include "ServiceLocator.hpp"
+#include "Common.hpp"
 extern "C" {
 #include <Lua/lua.h>
 #include <Lua/lualib.h>
@@ -17,6 +18,14 @@ public:
 	template <typename R, typename O, typename... Args>
 	void RegisterFunction(O* obj, R(O::*func)(Args...), const char* name);
 	bool DoFile(const char* path);
+	template <typename T, typename... Args>
+	T callFunction(const char* name, Args... args);
+	template <typename T>
+	T GetVariable(const char* name);
+	void OpenTable(const char* name);
+	template <typename T>
+	void GetTable(T* var, const char* varName);
+	void PopStack(int n);
 private:
 	lua_State* L = nullptr;
 	template <typename R, typename O, typename... Args, size_t... I>
@@ -85,4 +94,43 @@ void LuaManager::RegisterHelper(O* obj, R(O:: * func)(Args...), std::index_seque
 template <typename R, typename O, typename... Args>
 void LuaManager::RegisterFunction(O* obj, R(O::*func)(Args...), const char* name) {
 	RegisterHelper(obj, func, std::make_index_sequence<sizeof...(Args)>{}, name);
+}
+
+template <typename T, typename... Args>
+T LuaManager::callFunction(const char* name, Args... args) {
+	lua_getglobal(L, name);
+	(lua_push(L, args), ...);
+	if constexpr (!std::is_void_v<T>) {
+		if (lua_pcall(L, sizeof...(args), 1, 0) != LUA_OK) {
+			std::cerr << "Couldn't call Lua function : " << name << std::endl;
+			throw std::runtime_error("Couldn't call Lua function");
+		}
+		T value = lua_get<T>(L, -1);
+		lua_pop(L, 1);
+		return value;
+	}
+	else {
+		if (lua_pcall(L, sizeof...(args), 0, 0) != LUA_OK) {
+			std::cerr << "Couldn't call Lua function : " << name << std::endl;
+			throw std::runtime_error("Couldn't call Lua function");
+		}
+		return T{};
+	}
+}
+
+template <typename T>
+T LuaManager::GetVariable(const char* name) {
+	lua_getglobal(L, name);
+	T value = lua_get<T>(L, -1);
+	lua_pop(L, 1);
+	return value;
+}
+
+template <typename T>
+void LuaManager::GetTable(T* var, const char* varName) {
+	if (lua_istable(L, -1)) {
+		lua_getfield(L, -1, varName);
+		*var = lua_get<T>(L, -1);
+		lua_pop(L, 1);
+	}
 }
