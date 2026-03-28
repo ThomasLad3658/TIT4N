@@ -31,6 +31,11 @@ const char* lua_get<const char*>(lua_State* L, int index) {
 	return lua_tostring(L, index);
 }
 
+template<>
+std::string lua_get<std::string>(lua_State* L, int index) {
+	return lua_tostring(L, index);
+}
+
 template <typename T>
 void lua_push(lua_State* L, T value) {
 	//

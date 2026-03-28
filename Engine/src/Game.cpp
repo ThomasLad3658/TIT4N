@@ -20,8 +20,8 @@ Game::Game() {
 	windowWidth = 0;
 	windowHeight = 0;
 
-	sceneManager = std::make_unique<SceneManager>();
-	renderSystem = std::make_unique<RenderSystem>();
+	sceneManager = std::make_unique<SceneManager>(&entities);
+	renderSystem = std::make_unique<RenderSystem>(&entities);
 	physicsSystem = std::make_unique<PhysicsSystem>();
 	luaManager = std::make_unique<LuaManager>();
 
@@ -45,6 +45,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::CreateWindow, "CreateWindow");
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
+	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadLevel, "LoadLevel");
 
 	const char* basePath = SDL_GetBasePath();
 	if (!basePath) {
@@ -56,12 +57,14 @@ void Game::Run() {
 		throw std::runtime_error("Window wasn't created yet");
 	}
 
+	// For testing purposes, create an entity and register it to the render system
 	Entity* entity = new Entity(
 		std::string(basePath) + "Game/assets/sprites/player/Soldier.png",
 		{ 0.0f, 0.0f, 100.0f, 100.0f },
 		{ 0.0f, 0.0f, 500.0f, 500.0f }
 	);
-	renderSystem->registerEntity(entity);
+	entity->Init(renderSystem->getRenderer());
+	registerEntity(entity);
 
 	SDL_Event event;
 	running = true;
@@ -104,4 +107,32 @@ const char* Game::getWindowTitle() {
 void Game::getWindowSize(int* width, int* height) {
 	*width = windowWidth;
 	*height = windowHeight;
+}
+
+bool Game::registerEntity(Entity* entity) {
+	// Returns true if the entity has been successfuly registered, false if the entity was already registered
+	if (isEntityRegistered(entity)) return false;
+	//if (!entity->isInitialized()) entity->Init(renderer); why does that exist ? the entity should be initialized when it's created, not when it's registered to the render system
+	entities.push_back(entity);
+	return true;
+}
+
+bool Game::isEntityRegistered(Entity* entity) {
+	for (const auto& e : entities) {
+		if (e->getId() == entity->getId()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Game::unregisterEntity(Entity* entity) {
+	// Returns true if the entity was found and removed, false otherwise
+	for (auto it = entities.begin(); it != entities.end(); ++it) {
+		if ((*it)->getId() == entity->getId()) {
+			entities.erase(it);
+			return true;
+		}
+	}
+	return false;
 }

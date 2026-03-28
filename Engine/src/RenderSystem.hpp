@@ -5,14 +5,12 @@
 
 class RenderSystem {
 public:
-	RenderSystem();
+	RenderSystem(std::vector<Entity*>*);
 	~RenderSystem();
 	void Init(SDL_Window* window);
 	bool render();
-	bool registerEntity(Entity* entity);
-	bool isEntityRegistered(Entity* entity);
-	bool unregisterEntity(Entity* entity);
+	SDL_Renderer* getRenderer();
 private:
 	SDL_Renderer* renderer;
-	std::vector<Entity*> entities;
+	std::vector<Entity*>* entities;
 };
