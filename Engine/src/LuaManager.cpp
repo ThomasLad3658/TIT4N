@@ -83,14 +83,3 @@ bool LuaManager::DoFile(const char* path) {
 	}
 	else return true;
 }
-
-void LuaManager::OpenTable(const char* name) {
-	lua_getglobal(L, name);
-	if (!lua_istable(L, -1)) {
-		throw std::runtime_error("Table already exists");
-	}
-}
-
-void LuaManager::PopStack(int n) {
-	lua_pop(L, n);
-}

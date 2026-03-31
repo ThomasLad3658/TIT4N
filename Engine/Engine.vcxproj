@@ -144,6 +144,7 @@ xcopy /y /e /i "$(SolutionDir)Game" "$(ProjectDir)Game"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Background.cpp" />
+    <ClCompile Include="src\Common.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\LuaManager.cpp" />
     <ClCompile Include="src\main.cpp" />

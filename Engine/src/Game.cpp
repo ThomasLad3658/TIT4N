@@ -7,6 +7,7 @@
 #include "PhysicsSystem.hpp"
 #include "LuaManager.hpp"
 #include "Entity.hpp"
+#include "Common.hpp"
 
 Game::Game() {
 	std::cout << "Initializing Game...\n";
@@ -47,11 +48,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadLevel, "LoadLevel");
 
-	const char* basePath = SDL_GetBasePath();
-	if (!basePath) {
-		throw std::runtime_error("SDL_GetBasePath() failed");
-	}
-	luaManager->DoFile((std::string(basePath) + "Game/main.lua").c_str());
+	luaManager->DoFile((getBasePath() + "Game/main.lua").c_str());
 	if (!window) {
 		std::cerr << "Window isn't initialized" << std::endl;
 		throw std::runtime_error("Window wasn't created yet");
@@ -59,7 +56,7 @@ void Game::Run() {
 
 	// For testing purposes, create an entity and register it to the render system
 	Entity* entity = new Entity(
-		std::string(basePath) + "Game/assets/sprites/player/Soldier.png",
+		getBasePath() + "Game/assets/sprites/player/Soldier.png",
 		{ 0.0f, 0.0f, 100.0f, 100.0f },
 		{ 0.0f, 0.0f, 500.0f, 500.0f }
 	);

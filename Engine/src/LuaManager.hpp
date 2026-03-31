@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <string>
 #include <vector>
 #include <memory>
 #include <type_traits>
@@ -21,11 +22,7 @@ public:
 	template <typename T, typename... Args>
 	T callFunction(const char* name, Args... args);
 	template <typename T>
-	T GetVariable(const char* name);
-	void OpenTable(const char* name);
-	template <typename T>
-	void GetTable(T* var, const char* varName);
-	void PopStack(int n);
+	void ForEach(std::string field, void(T var));
 private:
 	lua_State* L = nullptr;
 	template <typename R, typename O, typename... Args, size_t... I>
@@ -122,18 +119,45 @@ T LuaManager::callFunction(const char* name, Args... args) {
 }
 
 template <typename T>
-T LuaManager::GetVariable(const char* name) {
-	lua_getglobal(L, name);
-	T value = lua_get<T>(L, -1);
-	lua_pop(L, 1);
-	return value;
+void LuaManager::ForEach(std::string field, void(*func)(T var)) {
+
+	std::stringstream ss(field);
+	std::vector<std::string> fields;
+	std::string fieldPart;
+
+	while (std::getline(ss, fieldPart, '.')) {
+		fields.push_back(fieldPart);
+	}
+
+	for (int i = 0; i < fields.size(); i++) {
+		lua_getfield(L, -1, fields[i].c_str());
+	}
+
+	for (int i = 0; i < lua_rawlen(L, -1); i++) {
+		lua_rawgeti(L, -1, i);
+		func(lua_get<T>(L, -1));
+	}
+	
 }
 
-template <typename T>
-void LuaManager::GetTable(T* var, const char* varName) {
-	if (lua_istable(L, -1)) {
-		lua_getfield(L, -1, varName);
-		*var = lua_get<T>(L, -1);
-		lua_pop(L, 1);
+template <>
+void LuaManager::ForEach(std::string field, void(*func)(void* var)) {
+
+	std::stringstream ss(field);
+	std::vector<std::string> fields;
+	std::string fieldPart;
+
+	while (std::getline(ss, fieldPart, '.')) {
+		fields.push_back(fieldPart);
 	}
+
+	for (int i = 0; i < fields.size(); i++) {
+		lua_getfield(L, -1, fields[i]);
+	}
+
+	for (int i = 1; i <= lua_rawlen(L, -1); i++) {
+		lua_rawgeti(L, -1, i);
+		(*func)(lua_get<T>(L, -1));
+	}
+
 }
