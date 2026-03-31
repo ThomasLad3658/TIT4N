@@ -7,6 +7,7 @@
 #include "PhysicsSystem.hpp"
 #include "LuaManager.hpp"
 #include "Entity.hpp"
+#include "SoundSystem.hpp"
 
 Game::Game() {
 	std::cout << "Initializing Game...\n";
@@ -22,12 +23,14 @@ Game::Game() {
 
 	sceneManager = std::make_unique<SceneManager>();
 	renderSystem = std::make_unique<RenderSystem>();
+	soundSystem = std::make_unique<SoundSystem>();
 	physicsSystem = std::make_unique<PhysicsSystem>();
 	luaManager = std::make_unique<LuaManager>();
 
 	ServiceLocator::registerGame(this);
 	ServiceLocator::registerSceneManager(sceneManager.get());
 	ServiceLocator::registerRenderSystem(renderSystem.get());
+	ServiceLocator::registerSoundSystem(soundSystem.get());
 	ServiceLocator::registerPhysicsSystem(physicsSystem.get());
 	ServiceLocator::registerLuaManager(luaManager.get());
 
@@ -74,6 +77,7 @@ void Game::Run() {
 			}
 		}
 		renderSystem->render();
+		soundSystem->update();
 	}
 }
 

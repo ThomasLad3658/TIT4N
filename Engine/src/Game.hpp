@@ -8,6 +8,7 @@ class SceneManager;
 class RenderSystem;
 class PhysicsSystem;
 class LuaManager;
+class SoundSystem;
 
 class Game {
 public:
@@ -25,6 +26,7 @@ private:
 	SDL_Window* window;
 	std::unique_ptr<SceneManager> sceneManager;
 	std::unique_ptr<RenderSystem> renderSystem;
+	std::unique_ptr<SoundSystem> soundSystem;
 	std::unique_ptr<PhysicsSystem> physicsSystem;
 	std::unique_ptr<LuaManager> luaManager;
 	const char* windowTitle;
