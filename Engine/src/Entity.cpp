@@ -1,8 +1,8 @@
 #include <SDL3_image/SDL_image.h>
 #include "Entity.hpp"
 
-Entity::Entity(std::string tag, const SDL_FRect& src, const SDL_FRect& dst) :
-	tag(tag), srcrect(src), dstrect(dst)
+Entity::Entity(std::string filepath, const SDL_FRect& src, const SDL_FRect& dst) :
+	tag(tag), srcrect(src), dstrect(dst), filepath(filepath)
 {
 	filepath = "";
 	id = nextId;

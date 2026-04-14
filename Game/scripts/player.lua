@@ -1,0 +1,2 @@
+playerPath = "Game/assets/sprites/player/Soldier.png"
+

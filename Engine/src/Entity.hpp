@@ -6,7 +6,7 @@
 
 class Entity {
 public:
-	Entity(std::string path, const SDL_FRect& src, const SDL_FRect& dst);
+	Entity(std::string filepath, const SDL_FRect& src, const SDL_FRect& dst);
 	~Entity();
 	void Init(SDL_Renderer* sdlRenderer);
 	bool present();

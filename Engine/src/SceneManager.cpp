@@ -17,20 +17,22 @@ void SceneManager::LoadLevel(std::string name) {
 
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 	luaManager->DoFile(levelPath.c_str());
-	for (int i = 1; i <= luaManager->GetVariable<int>("level.entityCount"); i++) {
+	for (int i = 1; i <= luaManager->GetVariable<int>((name + ".entityCount").c_str()); i++) {
+		std::string tag = luaManager->GetVariable<std::string>((name + ".entities.entity" + std::to_string(i) + ".tag").c_str());
+		luaManager->DoFile((getBasePath() + "Game\\scripts\\" + tag + ".lua").c_str());
 		Entity* entity = new Entity(
-			luaManager->GetVariable<std::string>(("level.entities.entity" + std::to_string(i) + ".path").c_str()),
+			luaManager->GetVariable<std::string>((tag + "Path").c_str()),
 			SDL_FRect{
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".srcrect.x").c_str()),
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".srcrect.y").c_str()),
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".srcrect.w").c_str()),
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".srcrect.h").c_str())
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.x").c_str()),
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.y").c_str()),
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.w").c_str()),
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.h").c_str())
 			},
 			SDL_FRect{
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".dstrect.x").c_str()),
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".dstrect.y").c_str()),
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".dstrect.w").c_str()),
-				luaManager->GetVariable<float>(("level.entities.entity" + std::to_string(i) + ".dstrect.h").c_str())
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.x").c_str()),
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.y").c_str()),
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.w").c_str()),
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.h").c_str())
 			}
 		);
 		entity->Init(ServiceLocator::getRenderSystem()->getRenderer());
