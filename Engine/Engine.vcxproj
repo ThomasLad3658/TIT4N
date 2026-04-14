@@ -143,6 +143,7 @@ xcopy /y /e /i "$(SolutionDir)Game" "$(ProjectDir)Game"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\SaveSystem.cpp" />
     <ClCompile Include="src\Background.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\LuaManager.cpp" />
@@ -268,6 +269,8 @@ xcopy /y /e /i "$(SolutionDir)Game" "$(ProjectDir)Game"</Command>
     <ClInclude Include="include\SDL3\SDL_video.h" />
     <ClInclude Include="include\SDL3\SDL_vulkan.h" />
     <ClInclude Include="include\SDL3_image\SDL_image.h" />
+    <ClInclude Include="src\SaveSystem.hpp" />
+    <ClInclude Include="src\SaveSystem.h" />
     <ClInclude Include="src\Background.hpp" />
     <ClInclude Include="src\Common.hpp" />
     <ClInclude Include="src\Game.hpp" />
