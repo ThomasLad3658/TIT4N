@@ -1,2 +1,2 @@
-CreateWindow("TIT4N",  1920, 1080)
-LoadLevel("level2")
+CreateWindow("TIT4N",  640, 360)
+LoadLevel("level1")

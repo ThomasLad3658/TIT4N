@@ -1,15 +1,14 @@
 #include <SDL3_image/SDL_image.h>
 #include "Entity.hpp"
 
-Entity::Entity(std::string path, const SDL_FRect& src, const SDL_FRect& dst) :
-	srcrect(src), dstrect(dst)
+Entity::Entity(std::string tag, const SDL_FRect& src, const SDL_FRect& dst) :
+	tag(tag), srcrect(src), dstrect(dst)
 {
-	filepath = std::string(path.data());
+	filepath = "";
 	id = nextId;
 	Entity::nextId++;
 	texture = nullptr;
 	renderer = nullptr;
-	tag = "none";
 	renderLayer = 0;
 	isStatic = true;
 	hasScript = true;

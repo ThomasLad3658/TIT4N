@@ -1,5 +1,6 @@
 #include "LuaManager.hpp"
 #include "Game.hpp"
+#include "Entity.hpp"
 
 template <typename T, typename S>
 T lua_get(lua_State* L, int index) {
@@ -82,15 +83,4 @@ bool LuaManager::DoFile(const char* path) {
 		return false;
 	}
 	else return true;
-}
-
-void LuaManager::OpenTable(const char* name) {
-	lua_getglobal(L, name);
-	if (!lua_istable(L, -1)) {
-		throw std::runtime_error("Table already exists");
-	}
-}
-
-void LuaManager::PopStack(int n) {
-	lua_pop(L, n);
 }

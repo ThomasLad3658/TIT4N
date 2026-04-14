@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <vector>
 #include <memory>
 #include <type_traits>
@@ -10,6 +12,8 @@ extern "C" {
 #include <Lua/lualib.h>
 #include <Lua/lauxlib.h>
 }
+
+class Entity;
 
 class LuaManager{
 public:
@@ -22,10 +26,6 @@ public:
 	T callFunction(const char* name, Args... args);
 	template <typename T>
 	T GetVariable(const char* name);
-	void OpenTable(const char* name);
-	template <typename T>
-	void GetTable(T* var, const char* varName);
-	void PopStack(int n);
 private:
 	lua_State* L = nullptr;
 	template <typename R, typename O, typename... Args, size_t... I>
@@ -123,17 +123,31 @@ T LuaManager::callFunction(const char* name, Args... args) {
 
 template <typename T>
 T LuaManager::GetVariable(const char* name) {
-	lua_getglobal(L, name);
-	T value = lua_get<T>(L, -1);
-	lua_pop(L, 1);
-	return value;
-}
-
-template <typename T>
-void LuaManager::GetTable(T* var, const char* varName) {
-	if (lua_istable(L, -1)) {
-		lua_getfield(L, -1, varName);
-		*var = lua_get<T>(L, -1);
+	std::string nameStr = name;
+	if (nameStr.find('.') == std::string::npos) {
+		lua_getglobal(L, name);
+		T value = lua_get<T>(L, -1);
 		lua_pop(L, 1);
+		return value;
 	}
+
+	std::stringstream ss(nameStr);
+	std::vector<std::string> fields;
+	std::string fieldPart;
+
+	while (std::getline(ss, fieldPart, '.')) {
+		fields.push_back(fieldPart);
+	}
+
+	lua_getglobal(L, fields[0].c_str());
+
+	for (int i = 1; i < (int)fields.size(); i++) {
+		lua_getfield(L, -1, fields[i].c_str());
+	}
+
+	T answer = lua_get<T>(L, -1);
+	
+	lua_pop(L, (int)fields.size());
+
+	return answer;
 }
