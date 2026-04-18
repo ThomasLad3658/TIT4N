@@ -143,6 +143,7 @@ xcopy /y /e /i "$(SolutionDir)Game" "$(ProjectDir)Game"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Sound.cpp" />
     <ClCompile Include="src\SoundSystem.cpp" />
     <ClCompile Include="src\Background.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -269,6 +270,7 @@ xcopy /y /e /i "$(SolutionDir)Game" "$(ProjectDir)Game"</Command>
     <ClInclude Include="include\SDL3\SDL_video.h" />
     <ClInclude Include="include\SDL3\SDL_vulkan.h" />
     <ClInclude Include="include\SDL3_image\SDL_image.h" />
+    <ClInclude Include="src\Sound.hpp" />
     <ClInclude Include="src\SoundSystem.hpp" />
     <ClInclude Include="src\Background.hpp" />
     <ClInclude Include="src\Common.hpp" />
