@@ -47,6 +47,16 @@ Game::~Game() {
 void Game::Run() {
 	std::cout << "Running Game...\n";
 
+	const Uint64 frameRate = 60;
+	const Uint64 frameDelay = 1000000000 / frameRate;
+
+	Uint64 lastTick = SDL_GetTicksNS();
+	Uint64 currentTick = 0;
+	Uint64 dt;
+
+	Uint64 frameStart;
+	Uint64 frameTime;
+
 	luaManager->RegisterFunction(this, &Game::CreateWindow, "CreateWindow");
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
@@ -61,6 +71,10 @@ void Game::Run() {
 	SDL_Event event;
 	running = true;
 	while (running) {
+		currentTick = frameStart = SDL_GetTicksNS();
+		dt = currentTick - lastTick;
+		lastTick = currentTick;
+
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_EVENT_QUIT:
@@ -68,7 +82,23 @@ void Game::Run() {
 				break;
 			}
 		}
+		float dtSeconds = dt / 1000000000.0f;
+		for (auto& entity : entities) {
+			entity->Update(dtSeconds);
+		}
 		renderSystem->render();
+
+		frameTime = SDL_GetTicksNS() - frameStart;
+		if (frameDelay > frameTime) {
+			
+			if (frameDelay - frameTime > 1000000) {
+				SDL_Delay((frameDelay - frameTime) / 1000000 - 1);
+			}
+			while(SDL_GetTicksNS() - frameStart < frameDelay){}
+			
+			//SDL_Delay((frameDelay - frameTime) / 1000000);
+			// Not precise enough
+		}
 	}
 }
 
@@ -120,9 +150,9 @@ bool Game::isEntityRegistered(Entity* entity) {
 
 bool Game::unregisterEntity(Entity* entity) {
 	// Returns true if the entity was found and removed, false otherwise
-	for (auto it = entities.begin(); it != entities.end(); ++it) {
-		if ((*it)->getId() == entity->getId()) {
-			entities.erase(it);
+	for (auto i = entities.begin(); i != entities.end(); ++i) {
+		if ((*i)->getId() == entity->getId()) {
+			entities.erase(i);
 			return true;
 		}
 	}

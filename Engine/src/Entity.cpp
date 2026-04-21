@@ -1,17 +1,17 @@
 #include <SDL3_image/SDL_image.h>
 #include "Entity.hpp"
+#include "LuaManager.hpp"
+#include "ServiceLocator.hpp"
 
-Entity::Entity(std::string filepath, const SDL_FRect& src, const SDL_FRect& dst) :
+Entity::Entity(std::string tag, std::string filepath, const SDL_FRect& src, const SDL_FRect& dst) :
 	tag(tag), srcrect(src), dstrect(dst), filepath(filepath)
 {
-	filepath = "";
 	id = nextId;
 	Entity::nextId++;
 	texture = nullptr;
 	renderer = nullptr;
 	renderLayer = 0;
 	isStatic = true;
-	hasScript = true;
 	hitbox = { 0.0f, 0.0f , 0.0f , 0.0f };
 }
 
@@ -43,6 +43,11 @@ bool Entity::present()
 		throw std::runtime_error("entity texture rendering failed");
 	}
 	return true;
+}
+
+void Entity::Update(float dt)
+{
+	ServiceLocator::getLuaManager()->callFunction<void>((tag + ".OnUpdate").c_str(), dt);
 }
 
 void Entity::setPosition(float x, float y) {

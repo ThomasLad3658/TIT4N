@@ -20,19 +20,23 @@ void SceneManager::LoadLevel(std::string name) {
 	for (int i = 1; i <= luaManager->GetVariable<int>((name + ".entityCount").c_str()); i++) {
 		std::string tag = luaManager->GetVariable<std::string>((name + ".entities.entity" + std::to_string(i) + ".tag").c_str());
 		luaManager->DoFile((getBasePath() + "Game\\scripts\\" + tag + ".lua").c_str());
+		float dstScale = luaManager->GetVariable<float>((tag + ".dstScale").c_str());
+		float w = luaManager->GetVariable<float>((tag + ".srcrect.w").c_str());
+		float h = luaManager->GetVariable<float>((tag + ".srcrect.h").c_str());
 		Entity* entity = new Entity(
-			luaManager->GetVariable<std::string>((tag + "Path").c_str()),
+			tag,
+			luaManager->GetVariable<std::string>((tag + ".path").c_str()),
 			SDL_FRect{
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.x").c_str()),
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.y").c_str()),
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.w").c_str()),
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".srcrect.h").c_str())
+				luaManager->GetVariable<float>((tag + ".srcrect.x").c_str()),
+				luaManager->GetVariable<float>((tag + ".srcrect.y").c_str()),
+				w,
+				h
 			},
 			SDL_FRect{
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.x").c_str()),
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.y").c_str()),
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.w").c_str()),
-				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".dstrect.h").c_str())
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".x").c_str()),
+				luaManager->GetVariable<float>((name + ".entities.entity" + std::to_string(i) + ".y").c_str()),
+				dstScale * w,
+				dstScale * h
 			}
 		);
 		entity->Init(ServiceLocator::getRenderSystem()->getRenderer());
