@@ -6,7 +6,13 @@
 
 class Entity {
 public:
-	Entity(std::string tag, std::string filepath, const SDL_FRect& src, const SDL_FRect& dst);
+	Entity(
+		std::string tag, 
+		int refenceIndex,
+		std::string filepath, 
+		const SDL_FRect& src, 
+		const SDL_FRect& dst
+	);
 	~Entity();
 	void Init(SDL_Renderer* sdlRenderer);
 	bool present();
@@ -17,7 +23,7 @@ public:
 	SDL_FRect getDstRect() const;
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;
-	unsigned int getId();
+	unsigned int getId() const;
 
 protected:
 	bool initialized = false;
@@ -31,5 +37,6 @@ protected:
 	unsigned char renderLayer;
 	bool isStatic;
 	unsigned int id;
+	int referenceIndex;
 	static inline unsigned int nextId = 0;
 };

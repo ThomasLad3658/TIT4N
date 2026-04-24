@@ -1,12 +1,11 @@
 #include "RenderSystem.hpp"
 #include <map>
 
-RenderSystem::RenderSystem(std::vector<Entity*>* entities) : entities(entities){
+RenderSystem::RenderSystem(std::vector<std::unique_ptr<Entity>>* entities) : entities(entities){
 	renderer = nullptr;
 }
 
 RenderSystem::~RenderSystem() {
-	entities->clear();
 	SDL_DestroyRenderer(renderer);
 }
 
@@ -23,13 +22,13 @@ bool RenderSystem::render() {
 	std::map<unsigned char, std::vector<Entity*>> renderLayers = {};
 	for (unsigned int i = 0; i < entities->size(); i++) {
 		unsigned char z = (*entities)[i]->getRenderLayer();
-		renderLayers[z].push_back((*entities)[i]);
+		renderLayers[z].push_back((*entities)[i].get());
 	}
 
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 
-	for (unsigned char i = 0; i < 255; i++) {
+	for (unsigned short i = 0; i < 256; i++) {
 		if (renderLayers.find(i) != renderLayers.end()) {
 			for (unsigned int j = 0; j < renderLayers[i].size(); j++) {
 				renderLayers[i][j]->present();

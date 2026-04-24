@@ -3,8 +3,8 @@
 #include "LuaManager.hpp"
 #include "ServiceLocator.hpp"
 
-Entity::Entity(std::string tag, std::string filepath, const SDL_FRect& src, const SDL_FRect& dst) :
-	tag(tag), srcrect(src), dstrect(dst), filepath(filepath)
+Entity::Entity(std::string tag, int referenceIndex, std::string filepath, const SDL_FRect& src, const SDL_FRect& dst) :
+	tag(tag), referenceIndex(referenceIndex), srcrect(src), dstrect(dst), filepath(filepath)
 {
 	id = nextId;
 	Entity::nextId++;
@@ -71,6 +71,6 @@ unsigned char Entity::getRenderLayer() const {
 	return renderLayer;
 }
 
-unsigned int Entity::getId() {
+unsigned int Entity::getId() const {
 	return id;
 }

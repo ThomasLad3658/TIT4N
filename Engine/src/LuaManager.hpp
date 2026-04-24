@@ -26,6 +26,8 @@ public:
 	T callFunction(const char* name, Args... args);
 	template <typename T>
 	T GetVariable(const char* name);
+	int ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath);
+	void DereferenceObj(int ref);
 private:
 	lua_State* L = nullptr;
 	template <typename R, typename O, typename... Args, size_t... I>
@@ -102,12 +104,15 @@ void LuaManager::RegisterFunction(O* obj, R(O::*func)(Args...), const char* name
 template <typename T, typename... Args>
 T LuaManager::callFunction(const char* name, Args... args) {
 
+	bool requiresSelf = false;
+
 	std::string nameStr = name;
 	if (nameStr.find('.') == std::string::npos) {
 		lua_getglobal(L, name);
+		(lua_push(L, args), ...);
 		if constexpr (!std::is_void_v<T>) {
 			if (lua_pcall(L, sizeof...(args), 1, 0) != LUA_OK) {
-				std::cerr << "Couldn't call Lua function : " << name << std::endl;
+				std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
 				throw std::runtime_error("Couldn't call Lua function");
 			}
 			T value = lua_get<T>(L, -1);
@@ -116,7 +121,7 @@ T LuaManager::callFunction(const char* name, Args... args) {
 		}
 		else {
 			if (lua_pcall(L, sizeof...(args), 0, 0) != LUA_OK) {
-				std::cerr << "Couldn't call Lua function : " << name << std::endl;
+				std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
 				throw std::runtime_error("Couldn't call Lua function");
 			}
 			return T{};
@@ -134,33 +139,43 @@ T LuaManager::callFunction(const char* name, Args... args) {
 	lua_getglobal(L, fields[0].c_str());
 
 	for (int i = 1; i < (int)fields.size(); i++) {
-		lua_getfield(L, -1, fields[i].c_str());
+		if (fields[i].find("/") != std::string::npos) {
+			lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fields[i].erase(0, 1)));
+			requiresSelf = true;
+		}
+		else {
+			lua_getfield(L, -1, fields[i].c_str());
+		}
 	}
+	if (requiresSelf) lua_pushvalue(L, -2);
 
 	(lua_push(L, args), ...);
 	if constexpr (!std::is_void_v<T>) {
 		if (lua_pcall(L, sizeof...(args), 1, 0) != LUA_OK) {
-			std::cerr << "Couldn't call Lua function : " << name << std::endl;
+			std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
 			throw std::runtime_error("Couldn't call Lua function");
 		}
 		T value = lua_get<T>(L, -1);
-		lua_pop(L, 1);
+		lua_pop(L, (int)fields.size());
+		if (requiresSelf) lua_pop(L, 1);
 		return value;
 	}
 	else {
 		if (lua_pcall(L, sizeof...(args), 0, 0) != LUA_OK) {
-			std::cerr << "Couldn't call Lua function : " << name << std::endl;
+			std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
 			throw std::runtime_error("Couldn't call Lua function");
 		}
+		lua_pop(L, (int)fields.size() - 1);
+		if (requiresSelf) lua_pop(L, 1);
 		return T{};
 	}
-
-	lua_pop(L, (int)fields.size() - 1);
 
 }
 
 template <typename T>
 T LuaManager::GetVariable(const char* name) {
+	bool requiresSelf = false;
+
 	std::string nameStr = name;
 	if (nameStr.find('.') == std::string::npos) {
 		lua_getglobal(L, name);
@@ -180,7 +195,13 @@ T LuaManager::GetVariable(const char* name) {
 	lua_getglobal(L, fields[0].c_str());
 
 	for (int i = 1; i < (int)fields.size(); i++) {
-		lua_getfield(L, -1, fields[i].c_str());
+		if (fields[i].find("/") != std::string::npos) {
+			lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fields[i].erase(0, 1)));
+			requiresSelf = true;
+		}
+		else {
+			lua_getfield(L, -1, fields[i].c_str());
+		}
 	}
 
 	T answer = lua_get<T>(L, -1);

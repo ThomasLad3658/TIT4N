@@ -36,10 +36,6 @@ Game::Game() {
 
 Game::~Game() {
 	std::cout << "Cleaning Game...\n";
-
-	for (int i = 0; i < entities.size(); i++) {
-		delete entities[i];
-	}
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
@@ -96,8 +92,8 @@ void Game::Run() {
 			}
 			while(SDL_GetTicksNS() - frameStart < frameDelay){}
 			
-			//SDL_Delay((frameDelay - frameTime) / 1000000);
 			// Not precise enough
+			//SDL_Delay((frameDelay - frameTime) / 1000000);
 		}
 	}
 }
@@ -122,7 +118,7 @@ bool Game::SetWindowSize(int w, int h) {
 	return SDL_SetWindowSize(window, w, h);
 }
 
-const char* Game::getWindowTitle() {
+std::string Game::getWindowTitle() {
 	return windowTitle;
 }
 
@@ -131,11 +127,10 @@ void Game::getWindowSize(int* width, int* height) {
 	*height = windowHeight;
 }
 
-bool Game::registerEntity(Entity* entity) {
+bool Game::registerEntity(std::unique_ptr<Entity> entity) {
 	// Returns true if the entity has been successfuly registered, false if the entity was already registered
-	if (isEntityRegistered(entity)) return false;
-	//if (!entity->isInitialized()) entity->Init(renderer); why does that exist ? the entity should be initialized when it's created, not when it's registered to the render system
-	entities.push_back(entity);
+	if (isEntityRegistered(entity.get())) return false;
+	entities.push_back(std::move(entity));
 	return true;
 }
 
