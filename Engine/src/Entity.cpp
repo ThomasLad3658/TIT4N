@@ -19,6 +19,7 @@ Entity::~Entity() {
 	if (initialized == true) {
 		SDL_DestroyTexture(texture);
 	}
+	ServiceLocator::getLuaManager()->DereferenceObj(referenceIndex);
 }
 
 void Entity::Init(SDL_Renderer* sdlRenderer) {
@@ -47,7 +48,20 @@ bool Entity::present()
 
 void Entity::Update(float dt)
 {
-	ServiceLocator::getLuaManager()->callFunction<void>((tag + ".OnUpdate").c_str(), dt);
+	LuaManager* luaManager = ServiceLocator::getLuaManager();
+	srcrect = {
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.x").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.y").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.w").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.h").c_str())
+	};
+	dstrect = {
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".x").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".y").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str()) * srcrect.w,
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str()) * srcrect.h
+	};
+	luaManager->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnUpdate").c_str(), dt);
 }
 
 void Entity::setPosition(float x, float y) {

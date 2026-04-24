@@ -103,6 +103,94 @@ void LuaManager::RegisterFunction(O* obj, R(O::*func)(Args...), const char* name
 
 template <typename T, typename... Args>
 T LuaManager::callFunction(const char* name, Args... args) {
+	bool requiresSelf = false;
+
+	std::string nameStr = name;
+	if (nameStr.find('.') == std::string::npos) {
+		lua_getglobal(L, name);
+		(lua_push(L, args), ...);
+		if constexpr (!std::is_void_v<T>) {
+			if (lua_pcall(L, sizeof...(args), 1, 0) != LUA_OK) {
+				std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
+				throw std::runtime_error("Couldn't call Lua function");
+			}
+			T value = lua_get<T>(L, -1);
+			lua_pop(L, 1);
+			return value;
+		}
+		else {
+			if (lua_pcall(L, sizeof...(args), 0, 0) != LUA_OK) {
+				std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
+				throw std::runtime_error("Couldn't call Lua function");
+			}
+			return T{};
+		}
+	}
+
+	std::stringstream ss(nameStr);
+	std::vector<std::string> fields;
+	std::string fieldPart;
+
+	while (std::getline(ss, fieldPart, '.')) {
+		fields.push_back(fieldPart);
+	}
+
+	if (fields[0].find("/") != std::string::npos) {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fields[0].erase(0, 1)));
+		requiresSelf = true;
+	}
+	else {
+		lua_getglobal(L, fields[0].c_str());
+	}
+	for (int i = 1; i < (int)fields.size(); i++) {
+		if (fields[i].find("/") != std::string::npos) {
+			lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fields[i].erase(0, 1)));
+			requiresSelf = true;
+		}
+		else {
+			lua_getfield(L, -1, fields[i].c_str());
+		}
+	}
+
+	if (requiresSelf) lua_pushvalue(L, -2);
+	(lua_push(L, args), ...);
+
+	if constexpr (!std::is_void_v<T>) {
+		int res;
+		if (requiresSelf) {
+			res = lua_pcall(L, sizeof...(args) + 1, 1, 0);
+		}
+		else {
+			res = lua_pcall(L, sizeof...(args), 1, 0);
+		}
+		if (res != LUA_OK) {
+			std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
+			throw std::runtime_error("Couldn't call Lua function");
+		}
+		T value = lua_get<T>(L, -1);
+		lua_pop(L, (int)fields.size());
+		return value;
+	}
+	else {
+		int res;
+		if (requiresSelf) {
+			res = lua_pcall(L, sizeof...(args) + 1, 1, 0);
+		}
+		else {
+			res = lua_pcall(L, sizeof...(args), 1, 0);
+		}
+		if (res != LUA_OK) {
+			std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
+			throw std::runtime_error("Couldn't call Lua function");
+		}
+		lua_pop(L, (int)fields.size() - 1);
+		return T{};
+	}
+}
+
+/*
+template <typename T, typename... Args>
+T LuaManager::callFunction(const char* name, Args... args) {
 
 	bool requiresSelf = false;
 
@@ -136,7 +224,13 @@ T LuaManager::callFunction(const char* name, Args... args) {
 		fields.push_back(fieldPart);
 	}
 
-	lua_getglobal(L, fields[0].c_str());
+	if (fields[0].find("/") != std::string::npos) {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fields[0].erase(0, 1)));
+		requiresSelf = true;
+	}
+	else {
+		lua_getglobal(L, fields[0].c_str());
+	}
 
 	for (int i = 1; i < (int)fields.size(); i++) {
 		if (fields[i].find("/") != std::string::npos) {
@@ -151,7 +245,14 @@ T LuaManager::callFunction(const char* name, Args... args) {
 
 	(lua_push(L, args), ...);
 	if constexpr (!std::is_void_v<T>) {
-		if (lua_pcall(L, sizeof...(args), 1, 0) != LUA_OK) {
+		int res;
+		if (requiresSelf) {
+			res = lua_pcall(L, sizeof...(args) + 1, 1, 0);
+		}
+		else {
+			res = lua_pcall(L, sizeof...(args), 1, 0);
+		}
+		if (res != LUA_OK) {
 			std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
 			throw std::runtime_error("Couldn't call Lua function");
 		}
@@ -171,6 +272,7 @@ T LuaManager::callFunction(const char* name, Args... args) {
 	}
 
 }
+*/
 
 template <typename T>
 T LuaManager::GetVariable(const char* name) {
@@ -192,7 +294,13 @@ T LuaManager::GetVariable(const char* name) {
 		fields.push_back(fieldPart);
 	}
 
-	lua_getglobal(L, fields[0].c_str());
+	if (fields[0].find("/") != std::string::npos) {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fields[0].erase(0, 1)));
+		requiresSelf = true;
+	}
+	else {
+		lua_getglobal(L, fields[0].c_str());
+	}
 
 	for (int i = 1; i < (int)fields.size(); i++) {
 		if (fields[i].find("/") != std::string::npos) {

@@ -21,6 +21,9 @@ Game::Game() {
 	windowWidth = 0;
 	windowHeight = 0;
 
+	Uint64 frameRate = 60;
+	Uint64 frameDelay = 1000000000 / frameRate;
+
 	sceneManager = std::make_unique<SceneManager>(&entities);
 	renderSystem = std::make_unique<RenderSystem>(&entities);
 	physicsSystem = std::make_unique<PhysicsSystem>();
@@ -43,9 +46,6 @@ Game::~Game() {
 void Game::Run() {
 	std::cout << "Running Game...\n";
 
-	const Uint64 frameRate = 60;
-	const Uint64 frameDelay = 1000000000 / frameRate;
-
 	Uint64 lastTick = SDL_GetTicksNS();
 	Uint64 currentTick = 0;
 	Uint64 dt;
@@ -56,6 +56,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::CreateWindow, "CreateWindow");
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
+	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
 	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadLevel, "LoadLevel");
 
 	luaManager->DoFile((getBasePath() + "Game/main.lua").c_str());
@@ -116,6 +117,11 @@ bool Game::SetWindowTitle(const char* title) {
 
 bool Game::SetWindowSize(int w, int h) {
 	return SDL_SetWindowSize(window, w, h);
+}
+
+void Game::SetFrameRate(int fps) {
+	frameRate = fps;
+	frameDelay = 1000000000 / frameRate;
 }
 
 std::string Game::getWindowTitle() {

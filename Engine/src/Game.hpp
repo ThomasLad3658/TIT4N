@@ -20,6 +20,7 @@ public:
 	void CreateWindow(const char* title, int width, int height);
 	bool SetWindowTitle(const char* title);
 	bool SetWindowSize(int w, int h);
+	void SetFrameRate(int fps);
 	std::string getWindowTitle();
 	void getWindowSize(int* width, int* height);
 	bool registerEntity(std::unique_ptr<Entity> entity);
@@ -37,4 +38,6 @@ private:
 	std::string windowTitle;
 	int windowWidth;
 	int windowHeight;
+	Uint64 frameRate;
+	Uint64 frameDelay;
 };

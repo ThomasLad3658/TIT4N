@@ -106,8 +106,8 @@ int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* o
 	std::string nameStr = overridesPath;
 	if (nameStr.find('.') == std::string::npos) {
 		lua_getglobal(L, overridesPath);
-		lua_push(L, -3);
-		lua_push(L, -2);
+		lua_pushvalue(L, -3);
+		lua_pushvalue(L, -2);
 	}
 	else {
 		std::stringstream ss(nameStr);

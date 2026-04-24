@@ -6,10 +6,11 @@ level1 = {
 		},
 		entity2 = {
 			tag = "player",
-			x = 50, y = 50,
+			x = 100,
 			OnUpdate = function(self, dt)
 				-- Example of custom behavior for this entity
 				self.x = self.x + self.speed * dt
+				print(self.x)
 			end
 		}
 	}
