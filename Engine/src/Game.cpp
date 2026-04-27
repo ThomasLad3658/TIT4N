@@ -21,8 +21,8 @@ Game::Game() {
 	windowWidth = 0;
 	windowHeight = 0;
 
-	Uint64 frameRate = 60;
-	Uint64 frameDelay = 1000000000 / frameRate;
+	frameRate = 60;
+	frameDelay = 1000000000 / frameRate;
 
 	sceneManager = std::make_unique<SceneManager>(&entities);
 	renderSystem = std::make_unique<RenderSystem>(&entities);
@@ -131,6 +131,40 @@ std::string Game::getWindowTitle() {
 void Game::getWindowSize(int* width, int* height) {
 	*width = windowWidth;
 	*height = windowHeight;
+}
+
+std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
+	
+	LuaManager* luaManager = ServiceLocator::getLuaManager();
+	int ref;
+
+	std::string tag = luaManager->GetVariable<std::string>((dataPath + ".tag").c_str());
+	luaManager->DoFile((getBasePath() + "Game/scripts/" + tag + ".lua").c_str());
+	ref = luaManager->ReferenceNewObjWithPath(tag.c_str(), dataPath.c_str());
+	std::string objPath = "/" + std::to_string(ref);
+	float dstScale = luaManager->GetVariable<float>((objPath + ".dstScale").c_str());
+	float w = luaManager->GetVariable<float>((objPath + ".srcrect.w").c_str());
+	float h = luaManager->GetVariable<float>((objPath + ".srcrect.h").c_str());
+	std::unique_ptr<Entity> entity = std::make_unique<Entity>(
+		tag,
+		ref,
+		luaManager->GetVariable<std::string>((objPath + ".path").c_str()),
+		SDL_FRect{
+			luaManager->GetVariable<float>((objPath + ".srcrect.x").c_str()),
+			luaManager->GetVariable<float>((objPath + ".srcrect.y").c_str()),
+			w,
+			h
+		},
+		SDL_FRect{
+			luaManager->GetVariable<float>((objPath + ".x").c_str()),
+			luaManager->GetVariable<float>((objPath + ".y").c_str()),
+			dstScale * w,
+			dstScale * h
+		}
+	);
+	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::setPosition, objPath.c_str(), "setPosition");
+	return std::move(entity);
+
 }
 
 bool Game::registerEntity(std::unique_ptr<Entity> entity) {

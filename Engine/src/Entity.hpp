@@ -15,11 +15,12 @@ public:
 	);
 	~Entity();
 	void Init(SDL_Renderer* sdlRenderer);
+	void destroy();
 	bool present();
 	void Update(float dt);
 	bool isInitialized() const;
 	void setPosition(float x, float y);
-	void setRenderLayer(char z);
+	void setRenderLayer(unsigned char z);
 	SDL_FRect getDstRect() const;
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;

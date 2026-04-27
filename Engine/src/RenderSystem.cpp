@@ -28,16 +28,11 @@ bool RenderSystem::render() {
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 
-	for (unsigned char i = 0; i < 255; i++) {
+	for (unsigned int i = 0; i < 256; i++) {
 		if (renderLayers.find(i) != renderLayers.end()) {
 			for (unsigned int j = 0; j < renderLayers[i].size(); j++) {
 				renderLayers[i][j]->present();
 			}
-		}
-	}
-	if (renderLayers.find(255) != renderLayers.end()) {
-		for (unsigned int j = 0; j < renderLayers[255].size(); j++) {
-			renderLayers[255][j]->present();
 		}
 	}
 

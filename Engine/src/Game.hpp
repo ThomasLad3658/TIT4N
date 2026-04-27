@@ -23,6 +23,7 @@ public:
 	void SetFrameRate(int fps);
 	std::string getWindowTitle();
 	void getWindowSize(int* width, int* height);
+	std::unique_ptr<Entity> CreateEntity(std::string dataPath);
 	bool registerEntity(std::unique_ptr<Entity> entity);
 	bool isEntityRegistered(Entity* entity);
 	bool unregisterEntity(Entity* entity);

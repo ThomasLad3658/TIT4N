@@ -10,8 +10,9 @@ level1 = {
 			OnUpdate = function(self, dt)
 				-- Example of custom behavior for this entity
 				self.x = self.x + self.speed * dt
-				print(self.x)
-			end
+				--Use setPosition to update the entity's position in the game world
+				self.setPosition(self.x, self.y)
+			end,
 		}
 	}
 }

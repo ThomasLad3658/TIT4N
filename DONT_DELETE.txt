@@ -1,0 +1,48 @@
+[DÉMARRAGE]
+   │
+   ├─ Game::Run()
+   │    ├─ Lua : CreateWindow, SetFrameRate
+   │    └─ Lua : LoadLevel("level1")
+   │
+   ▼
+[CHARGEMENT DU NIVEAU]
+   │
+   ├─ SceneManager::LoadLevel()
+   │    ├─ Lecture de level1.lua
+   │    ├─ Pour chaque entité déclarée :
+   │    │    ├─ Lua : dofile(player.lua)    → définir la table "player"
+   │    │    ├─ Lua : player:new(overrides) → instance avec metatable
+   │    │    ├─ C++ : new Entity(tag, ref, ...) → stocke la référence Lua
+   │    │    ├─ C++ : entity->Init(renderer) → charge la texture SDL
+   │    │    ├─ C++ : Game::registerEntity(entity) → ajout au vecteur
+   │    │    └─ Lua : appeler entity:OnReady()   ★ nouveau callback
+   │    │
+   │    └─ Fin du chargement
+   │
+   ▼
+[BOUCLE PRINCIPALE]
+   │
+   ├─ Mise à jour des entrées (InputManager)
+   │    └─ SDL_PollEvent → met à jour l'état des touches/souris
+   │
+   ├─ Calcul du deltaTime (dt)
+   │
+   ├─ Pour chaque entité active (si visible & non pausée) :
+   │    │
+   │    ├─ [Optionnel] Si événement d’entrée non traité, appeler entity:OnInput(event)
+   │    │
+   │    ├─ Appel de entity:OnUpdate(dt)
+   │    │    └─ Le script Lua lit Input, modifie self.x, self.y, etc.
+   │    │
+   │    ├─ C++ : Relire depuis Lua les propriétés (x, y, srcrect, dstScale…)
+   │    │
+   │    └─ (Physique : plus tard, OnPhysicsUpdate dans une boucle fixe)
+   │
+   ├─ Rendu
+   │    ├─ RenderSystem::render()
+   │    │    ├─ Trier les entités par renderLayer (z-index)
+   │    │    └─ Pour chaque entité : entity->present() → SDL_RenderTexture
+   │    │
+   │    └─ SDL_RenderPresent
+   │
+   └─ Attente pour respecter le framerate (si besoin)

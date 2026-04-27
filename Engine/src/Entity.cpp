@@ -16,6 +16,7 @@ Entity::Entity(std::string tag, int referenceIndex, std::string filepath, const 
 }
 
 Entity::~Entity() {
+	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnDestroy").c_str(), true);
 	if (initialized == true) {
 		SDL_DestroyTexture(texture);
 	}
@@ -29,7 +30,14 @@ void Entity::Init(SDL_Renderer* sdlRenderer) {
 		std::cerr << "Failed to load entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("entity texture loading failed");
 	}
+
+	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnInit").c_str(), true);
+
 	initialized = true;
+}
+
+void Entity::destroy() {
+	//
 }
 
 bool Entity::isInitialized() const {
@@ -49,6 +57,11 @@ bool Entity::present()
 void Entity::Update(float dt)
 {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
+
+	luaManager->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnUpdate").c_str(), true, dt);
+
+	float dstScale = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str());
+	/*
 	srcrect = {
 		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.x").c_str()),
 		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.y").c_str()),
@@ -58,10 +71,10 @@ void Entity::Update(float dt)
 	dstrect = {
 		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".x").c_str()),
 		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".y").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str()) * srcrect.w,
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str()) * srcrect.h
+		dstScale* srcrect.w,
+		dstScale* srcrect.h
 	};
-	luaManager->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnUpdate").c_str(), dt);
+	*/
 }
 
 void Entity::setPosition(float x, float y) {
@@ -69,7 +82,7 @@ void Entity::setPosition(float x, float y) {
 	dstrect.y = y;
 }
 
-void Entity::setRenderLayer(char z) {
+void Entity::setRenderLayer(unsigned char z) {
 	renderLayer = z;
 }
 

@@ -76,6 +76,51 @@ LuaManager::~LuaManager() {
 	lua_close(L);
 }
 
+bool LuaManager::GetFields(std::string fieldsPath) {
+	if (fieldsPath.find('.') == std::string::npos) {
+		if (fieldsPath[0] == '/') {
+			lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fieldsPath.erase(0, 1)));
+		}
+		else {
+			lua_getglobal(L, fieldsPath.c_str());
+		}
+		return true;
+	}
+
+	std::stringstream ss(fieldsPath);
+	std::vector<std::string> fields;
+	std::string fieldPart;
+
+	while (std::getline(ss, fieldPart, '.')) {
+		fields.push_back(fieldPart);
+	}
+
+	if (fields[0][0] == '/') {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, std::stoi(fields[0].erase(0, 1)));
+	}
+	else {
+		lua_getglobal(L, fields[0].c_str());
+	}
+	if (!lua_istable(L, -1)) {
+		lua_pop(L, 1);
+		return false;
+	}
+
+	for (int i = 1; i < (int)fields.size() - 1; i++) {
+		lua_getfield(L, -1, fields[i].c_str());
+		if (!lua_istable(L, -1)) {
+			lua_pop(L, i);
+			return false;
+		}
+		lua_remove(L, -2);
+	}
+
+	lua_getfield(L, -1, fields.back().c_str());
+	lua_remove(L, -2);
+
+	return true;
+}
+
 bool LuaManager::DoFile(const char* path) {
 	if (luaL_dofile(L, path) != LUA_OK) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
@@ -84,8 +129,6 @@ bool LuaManager::DoFile(const char* path) {
 	}
 	else return true;
 }
-
-// tag.c_str(), (name + ".entities.entity" + std::to_string(i)).c_str()
 
 int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath) {
 
@@ -102,38 +145,17 @@ int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* o
 	}
 
 	lua_pushvalue(L, -2);
+	lua_remove(L, -3);
 	
-	std::string nameStr = overridesPath;
-	if (nameStr.find('.') == std::string::npos) {
-		lua_getglobal(L, overridesPath);
-		lua_pushvalue(L, -3);
-		lua_pushvalue(L, -2);
-	}
-	else {
-		std::stringstream ss(nameStr);
-		std::vector<std::string> fields;
-		std::string fieldPart;
-
-		while (std::getline(ss, fieldPart, '.')) {
-			fields.push_back(fieldPart);
-		}
-
-		lua_getglobal(L, fields[0].c_str());
-
-		for (int i = 1; i < (int)fields.size(); i++) {
-			lua_getfield(L, -1, fields[i].c_str());
-		}
-
-		for (int i = 0; i < (int)fields.size() - 1; i++) {
-			lua_remove(L, -2);
-		}
+	if (!GetFields(overridesPath)) {
+		lua_pop(L, 1);
+		throw std::runtime_error(std::string("Overrides not found: ") + overridesPath);
 	}
 
 	if (lua_pcall(L, 2, 1, 0) != LUA_OK) {
 		std::cerr << "Couldn't create metatable for Lua table : " << blueprintName << " from path : " << overridesPath << " : " << lua_tostring(L, -1) << std::endl;
 		throw std::runtime_error("Couldn't create metatable");
 	}
-	lua_remove(L, -2);
 
 	return luaL_ref(L, LUA_REGISTRYINDEX);
 
