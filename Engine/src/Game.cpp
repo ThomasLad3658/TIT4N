@@ -6,6 +6,7 @@
 #include "RenderSystem.hpp"
 #include "PhysicsSystem.hpp"
 #include "LuaManager.hpp"
+#include "InputManager.hpp"
 #include "Entity.hpp"
 #include "Common.hpp"
 
@@ -28,12 +29,14 @@ Game::Game() {
 	renderSystem = std::make_unique<RenderSystem>(&entities);
 	physicsSystem = std::make_unique<PhysicsSystem>();
 	luaManager = std::make_unique<LuaManager>();
+	inputManager = std::make_unique<InputManager>();
 
 	ServiceLocator::registerGame(this);
 	ServiceLocator::registerSceneManager(sceneManager.get());
 	ServiceLocator::registerRenderSystem(renderSystem.get());
 	ServiceLocator::registerPhysicsSystem(physicsSystem.get());
 	ServiceLocator::registerLuaManager(luaManager.get());
+	ServiceLocator::registerInputManager(inputManager.get());
 
 }
 
@@ -58,6 +61,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
 	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadLevel, "LoadLevel");
+	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetKeyState, "GetKeyState");
 
 	luaManager->DoFile((getBasePath() + "Game/main.lua").c_str());
 	if (!window) {
@@ -73,6 +77,7 @@ void Game::Run() {
 		lastTick = currentTick;
 
 		while (SDL_PollEvent(&event)) {
+			inputManager->ProcessInputEvent(event);
 			switch (event.type) {
 			case SDL_EVENT_QUIT:
 				running = false;
@@ -84,6 +89,8 @@ void Game::Run() {
 			entity->Update(dtSeconds);
 		}
 		renderSystem->render();
+
+		inputManager->EndOfFrame();
 
 		frameTime = SDL_GetTicksNS() - frameStart;
 		if (frameDelay > frameTime) {
@@ -162,7 +169,7 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 			dstScale * h
 		}
 	);
-	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::setPosition, objPath.c_str(), "setPosition");
+	//luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::setRenderLayer, objPath.c_str(), "setRenderLayer");
 	return std::move(entity);
 
 }

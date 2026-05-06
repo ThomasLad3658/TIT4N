@@ -17,7 +17,8 @@ void SceneManager::LoadLevel(std::string name) {
 
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 	luaManager->DoFile(levelPath.c_str());
-	for (int i = 1; i <= luaManager->GetVariable<int>((name + ".entityCount").c_str()); i++) {
+	int size = luaManager->GetFieldSize((name + ".entities"));
+	for (int i = 1; i <= size; i++) {
 
 		std::string entityPath = (name + ".entities.entity" + std::to_string(i));
 

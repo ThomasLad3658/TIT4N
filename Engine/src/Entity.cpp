@@ -58,10 +58,21 @@ void Entity::Update(float dt)
 {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 
+	dstrect.w = 400;
+
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.x", srcrect.x);
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.y", srcrect.y);
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.w", srcrect.w);
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.h", srcrect.h);
+
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".x", dstrect.x);
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".y", dstrect.y);
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".w", dstrect.w);
+	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".h", dstrect.h);
+
 	luaManager->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnUpdate").c_str(), true, dt);
 
 	float dstScale = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str());
-	/*
 	srcrect = {
 		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.x").c_str()),
 		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.y").c_str()),
@@ -74,12 +85,16 @@ void Entity::Update(float dt)
 		dstScale* srcrect.w,
 		dstScale* srcrect.h
 	};
-	*/
 }
 
-void Entity::setPosition(float x, float y) {
-	dstrect.x = x;
-	dstrect.y = y;
+void Entity::PlayAnimation(std::string animationName) {
+	LuaManager* luaManager = ServiceLocator::getLuaManager();
+	std::string animationPath = "/" + std::to_string(referenceIndex) + "animations." + animationName;
+	animationRow = luaManager->GetVariable<int>((animationPath + ".row").c_str());
+	animationFrameCount = luaManager->GetVariable<int>((animationPath + ".frameCount").c_str());
+	animationFPS = luaManager->GetVariable<int>((animationPath + ".fps").c_str());
+	animationLoop = luaManager->GetVariable<bool>((animationPath + ".loop").c_str());
+	animationCurrentFrame = 0;
 }
 
 void Entity::setRenderLayer(unsigned char z) {

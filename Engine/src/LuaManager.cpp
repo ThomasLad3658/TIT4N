@@ -130,6 +130,20 @@ bool LuaManager::DoFile(const char* path) {
 	else return true;
 }
 
+int LuaManager::GetFieldSize(std::string fieldsPath) {
+	int count = 0;
+	GetFields(fieldsPath);
+	lua_pushnil(L);
+
+	while (lua_next(L, -2) != 0) {
+		count++;
+		lua_pop(L, 1);
+	}
+
+	lua_pop(L, 1);
+	return count;
+}
+
 int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath) {
 
 	lua_getglobal(L, blueprintName);

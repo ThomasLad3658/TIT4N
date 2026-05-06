@@ -28,6 +28,9 @@ public:
 	T callFunction(const char* name, bool requiresSelf, Args... args);
 	template <typename T>
 	T GetVariable(const char* name);
+	template <typename T>
+	void SetVariable(std::string name, T value);
+	int GetFieldSize(std::string fieldsPath);
 	int ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath);
 	void DereferenceObj(int ref);
 private:
@@ -174,4 +177,12 @@ T LuaManager::GetVariable(const char* name) {
 	GetFields(name);
 	T answer = lua_get<T>(L, -1);
 	return answer;
+}
+
+template<typename T>
+void LuaManager::SetVariable(std::string name, T value) {
+	GetFields(name.erase(name.size() - name.find_last_of('.')));
+	lua_push<T>(L, value);
+	lua_setfield(L, -2, name.substr(name.find_last_of('.') + 1).c_str());
+	lua_pop(L, 1);
 }

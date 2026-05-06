@@ -4,12 +4,14 @@
 #include "RenderSystem.hpp"
 #include "PhysicsSystem.hpp"
 #include "LuaManager.hpp"
+#include "InputManager.hpp"
 
 Game* ServiceLocator::game = nullptr;
 SceneManager* ServiceLocator::sceneManager = nullptr;
 RenderSystem* ServiceLocator::renderSystem = nullptr;
 PhysicsSystem* ServiceLocator::physicsSystem = nullptr;
 LuaManager* ServiceLocator::luaManager = nullptr;
+InputManager* ServiceLocator::inputManager = nullptr;
 
 void ServiceLocator::registerGame(Game* g) {
 	game = g;
@@ -31,6 +33,10 @@ void ServiceLocator::registerLuaManager(LuaManager* lm) {
 	luaManager = lm;
 }
 
+void ServiceLocator::registerInputManager(InputManager* im) {
+	inputManager = im;
+}
+
 Game* ServiceLocator::getGame() {
 	return game;
 }
@@ -49,4 +55,8 @@ PhysicsSystem* ServiceLocator::getPhysicsSystem() {
 
 LuaManager* ServiceLocator::getLuaManager() {
 	return luaManager;
+}
+
+InputManager* ServiceLocator::getInputManager() {
+	return inputManager;
 }

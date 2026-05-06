@@ -18,8 +18,8 @@ public:
 	void destroy();
 	bool present();
 	void Update(float dt);
+	void PlayAnimation(std::string animationName);
 	bool isInitialized() const;
-	void setPosition(float x, float y);
 	void setRenderLayer(unsigned char z);
 	SDL_FRect getDstRect() const;
 	std::string getTag() const;
@@ -27,16 +27,25 @@ public:
 	unsigned int getId() const;
 
 protected:
-	bool initialized = false;
 	std::string filepath;
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
+
 	SDL_FRect srcrect;
 	SDL_FRect dstrect;
 	SDL_FRect hitbox;
+
+	int animationRow = 0;
+	int animationFrameCount = 0;
+	int animationCurrentFrame = 0;
+	int animationFPS = 0;
+	bool animationLoop = true;
+
 	std::string tag;
 	unsigned char renderLayer;
 	bool isStatic;
+	bool initialized = false;
+
 	unsigned int id;
 	int referenceIndex;
 	static inline unsigned int nextId = 0;
