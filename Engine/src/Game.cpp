@@ -66,6 +66,12 @@ void Game::Run() {
 	);
 	renderSystem->registerEntity(entity);
 
+	int sound = soundSystem->createSound(std::string(basePath) + "Game/assets/sounds/example.wav");
+	if (sound != -1) {
+		soundSystem->loop(sound, true);
+		soundSystem->play(sound);
+	}
+	
 	SDL_Event event;
 	running = true;
 	while (running) {

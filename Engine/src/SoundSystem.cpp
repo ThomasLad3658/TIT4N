@@ -4,39 +4,78 @@ SoundSystem::SoundSystem() {
 }
 
 SoundSystem::~SoundSystem() {
-	sounds.clear();
+    sounds.clear();
+}
+
+int SoundSystem::createSound(const std::string& filePath) {
+    return createSound(filePath, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
+}
+
+int SoundSystem::createSound(const std::string& filePath, SDL_AudioDeviceID dev) {
+    std::unique_ptr<Sound> sound = std::make_unique<Sound>(filePath, dev);
+    if (registerSound(std::move(sound))) {
+        return sounds.size() - 1;
+    }
+    return -1;
 }
 
 void SoundSystem::update() {
-	for (int i = 0; i < sounds.size(); i++) {
-		Sound sound = sounds[i];
-		sound.update();
-		if (!sound.isUsable()) sounds.erase(sounds.begin() + i);
-	}
+    for (int i = sounds.size() - 1; i >= 0; i--) {
+        sounds[i]->update();
+        if (!sounds[i]->isUsable()) {
+            sounds.erase(sounds.begin() + i);
+        }
+    }
 }
 
-Sound* SoundSystem::createSound(const char* filePath) {
-	return createSound(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, filePath);
+bool SoundSystem::registerSound(std::unique_ptr<Sound> sound) {
+    if (sound->isUsable()) {
+        sounds.push_back(std::move(sound));
+        return true;
+    }
+    return false;
 }
 
-Sound* SoundSystem::createSound(SDL_AudioDeviceID device, const char* filePath) {
-    SDL_AudioSpec spec;
-    Uint8* buffer;
-    Uint32 length;
+bool SoundSystem::exists(int soundId) {
+    // Fixed: was returning true when null (inverted)
+    if (soundId < 0 || soundId >= (int)sounds.size()) return false;
+    return sounds[soundId] != nullptr;
+}
 
-	if (!SDL_LoadWAV(filePath, &spec, &buffer, &length)) {
-		Sound sound = Sound(SoundErrorId::LOAD_WAV);
-		return &sound;
-	}
+bool SoundSystem::unregisterSound(int soundId) {
+    if (soundId >= 0 && soundId < (int)sounds.size()) {
+        sounds[soundId] = nullptr;
+        return true;
+    }
+    return false;
+}
 
-	SDL_AudioStream* stream = SDL_CreateAudioStream(&spec, &spec);
+void SoundSystem::play(int soundId) {
+    if (!exists(soundId)) return;
+    return sounds[soundId]->play();
+}
 
-	SDL_PutAudioStreamData(stream, buffer, length);
+bool SoundSystem::isPlaying(int soundId) {
+    if (!exists(soundId)) return false;
+    return sounds[soundId]->isPlaying();
+}
 
-    SDL_FlushAudioStream(stream);
+void SoundSystem::stop(int soundId) {
+    if (!exists(soundId)) return;
+    sounds[soundId]->stop();
+}
 
-	Sound sound(spec, buffer, length, stream, device);
-	sounds.push_back(sound);
+void SoundSystem::resume(int soundId) {
+    if (!exists(soundId)) return;
+    sounds[soundId]->resume();
+}
 
-	return &sounds[-1];
+void SoundSystem::pause(int soundId) {
+    if (!exists(soundId)) return;
+    sounds[soundId]->pause();
+}
+
+void SoundSystem::loop(int soundId, bool loop) {
+    if (!exists(soundId)) return;
+    sounds[soundId]->loop = loop;
 }

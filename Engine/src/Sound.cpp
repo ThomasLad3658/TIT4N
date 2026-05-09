@@ -1,21 +1,39 @@
 #include "Sound.hpp"
 
-Sound::Sound(SoundErrorId errId) :
-	audioSpec(), buffer(nullptr), length(0), stream(nullptr), device(), startTick(-1), playing(false), usable(false), errorId(errId)
-{
+void Sound::cleanUp() {
+	usable = false;
+	if (stream) {
+		SDL_DestroyAudioStream(stream);
+		stream = nullptr;
+	}
+	if (buffer) {
+		SDL_free(buffer);
+		buffer = nullptr;
+	}
 }
 
-Sound::Sound(SDL_AudioSpec spec, Uint8* buf, Uint32 len, SDL_AudioStream* s, SDL_AudioDeviceID dev)
-	: audioSpec(spec), buffer(buf), length(len), stream(s), device(dev), startTick(-1), playing(false), usable(true), errorId(0)
-{}
+void Sound::init(std::string filePath) {
+	if (!SDL_LoadWAV(filePath.c_str(), &spec, &buffer, &length)) {
+		cleanUp();
+		errorId = SoundErrorId::LOAD_WAV;
+		return;
+	}
+	stream = SDL_OpenAudioDeviceStream(device, &spec, nullptr, nullptr);
+	if (!stream) {
+		cleanUp();
+		errorId = SoundErrorId::LOAD_DEVICE;
+		return;
+	}
+}
+
+Sound::Sound(std::string filePath, SDL_AudioDeviceID dev)
+	: device(dev), buffer(nullptr), stream(nullptr), startTick(-1), playing(false), paused(false), usable(true), errorId(0), duration(0.0f)
+{
+	init(filePath);
+}
 
 Sound::~Sound() {
-	if (usable) {
-		SDL_ClearAudioStream(stream);
-		SDL_DestroyAudioStream(stream);
-		SDL_free(stream);
-		usable = false;
-	}
+	cleanUp();
 }
 
 int Sound::getErrorId() const {
@@ -35,27 +53,44 @@ bool Sound::isPlaying() const {
 }
 
 void Sound::play() {
-	if (usable && !playing) {
-		startTick = SDL_GetTicks();
-		SDL_BindAudioStream(device, stream);
-		playing = true;
-	}
+	if (!usable || !buffer) return;
+	SDL_PutAudioStreamData(stream, buffer, (int)length);
+	SDL_ResumeAudioStreamDevice(stream);
+	playing = true;
+	paused = false;
+	startTick = SDL_GetTicks();
 }
 
+
 void Sound::update() {
-	if (playing && usable && SDL_GetAudioStreamAvailable(stream) == 0) {
-		SDL_ClearAudioStream(stream);
-		SDL_DestroyAudioStream(stream);
-		SDL_free(stream);
-		usable = false;
-		playing = false;
+	if (playing) {
+		// Check if stream is done
+		if (SDL_GetAudioStreamAvailable(stream) == 0) {
+			if (loop == true) play();
+			else stop();
+		}
 	}
 }
 
 void Sound::stop() {
-	SDL_ClearAudioStream(stream);
-	SDL_DestroyAudioStream(stream);
-	SDL_free(stream);
-	playing = false;
-	usable = false;
+	if (playing) {
+		SDL_PauseAudioStreamDevice(stream);
+		SDL_ClearAudioStream(stream);
+		playing = false;
+		paused = false;
+	}
+}
+
+void Sound::pause() {
+	if (playing and !paused) {
+		SDL_PauseAudioStreamDevice(stream);
+		paused = true;
+	}
+}
+
+void Sound::resume() {
+	if (playing and paused) {
+		SDL_ResumeAudioStreamDevice(stream);
+		paused = false;
+	}
 }
