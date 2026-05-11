@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <vector>
 #include <memory>
 #include <type_traits>
@@ -11,23 +13,29 @@ extern "C" {
 #include <Lua/lauxlib.h>
 }
 
+class Entity;
+
 class LuaManager{
 public:
 	LuaManager();
 	~LuaManager();
 	template <typename R, typename O, typename... Args>
 	void RegisterFunction(O* obj, R(O::*func)(Args...), const char* name);
+	template <typename R, typename O, typename... Args>
+	void RegisterFunctionToLuaField(O* obj, R(O::* func)(Args...), const char* fieldPath, const char* name);
 	bool DoFile(const char* path);
 	template <typename T, typename... Args>
-	T callFunction(const char* name, Args... args);
+	T callFunction(const char* name, bool requiresSelf, Args... args);
 	template <typename T>
 	T GetVariable(const char* name);
-	void OpenTable(const char* name);
 	template <typename T>
-	void GetTable(T* var, const char* varName);
-	void PopStack(int n);
+	void SetVariable(std::string name, T value);
+	int GetFieldSize(std::string fieldsPath);
+	int ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath);
+	void DereferenceObj(int ref);
 private:
 	lua_State* L = nullptr;
+	bool GetFields(std::string fieldsPath);
 	template <typename R, typename O, typename... Args, size_t... I>
 	void RegisterHelper(O* obj, R(O::*func)(Args...), std::index_sequence<I...>, const char *name);
 	std::vector<std::shared_ptr<void>>allocatedFuncPtrs;
@@ -50,6 +58,9 @@ bool lua_get<bool>(lua_State* L, int index);
 
 template<>
 const char* lua_get<const char*>(lua_State* L, int index);
+
+template<>
+std::string lua_get<std::string>(lua_State* L, int index);
 
 template <typename T>
 void lua_push(lua_State* L, T value);
@@ -88,49 +99,90 @@ void LuaManager::RegisterHelper(O* obj, R(O:: * func)(Args...), std::index_seque
 			return 1;
 		}
 	}, 2);
-	lua_setglobal(L, name);
 }
 
 template <typename R, typename O, typename... Args>
 void LuaManager::RegisterFunction(O* obj, R(O::*func)(Args...), const char* name) {
 	RegisterHelper(obj, func, std::make_index_sequence<sizeof...(Args)>{}, name);
+	lua_setglobal(L, name);
+}
+
+template <typename R, typename O, typename... Args>
+void LuaManager::RegisterFunctionToLuaField(O* obj, R(O::* func)(Args...), const char * fieldPath, const char* name) {
+	GetFields(fieldPath);
+	RegisterHelper(obj, func, std::make_index_sequence<sizeof...(Args)>{}, name);
+	lua_setfield(L, -2, name);
 }
 
 template <typename T, typename... Args>
-T LuaManager::callFunction(const char* name, Args... args) {
-	lua_getglobal(L, name);
-	(lua_push(L, args), ...);
-	if constexpr (!std::is_void_v<T>) {
-		if (lua_pcall(L, sizeof...(args), 1, 0) != LUA_OK) {
-			std::cerr << "Couldn't call Lua function : " << name << std::endl;
-			throw std::runtime_error("Couldn't call Lua function");
+T LuaManager::callFunction(const char* name, bool requiresSelf, Args... args) {
+
+	if (requiresSelf) {
+		std::string nameStr = name;
+		if (nameStr.find('.') == std::string::npos) {
+			std::cerr << "Function name must be in the format 'table.function' if requiresSelf is true : " << name << std::endl;
+			throw std::runtime_error("Invalid function name format");
 		}
+		else {
+			if (GetFields(name) == false) {
+				std::cerr << "Couldn't find path for function : " << name << std::endl;
+				throw std::runtime_error("Couldn't find path for function");
+			}
+			std::stringstream ss(nameStr);
+			std::vector<std::string> fields;
+			std::string fieldPart;
+			while (std::getline(ss, fieldPart, '.')) {
+				fields.push_back(fieldPart);
+			}
+			std::string funcTablePath;
+			funcTablePath += fields[0];
+			for (int i = 1; i < (int)fields.size() - 1; i++) {
+				funcTablePath += ".";
+				funcTablePath += fields[i];
+			}
+			if (GetFields(funcTablePath) == false) {
+				std::cerr << "Couldn't find table for function : " << name << std::endl;
+				throw std::runtime_error("Couldn't find table for function");
+			}
+		}
+	}
+	else {
+		GetFields(name);
+	}
+
+	(lua_push(L, args), ...);
+
+	int numArgs = sizeof...(args);
+	if (requiresSelf) {
+		numArgs++;
+	}
+	bool result = false;
+	if constexpr (!std::is_void_v<T>) result = true;
+	
+	if (lua_pcall(L, numArgs, result, 0) != LUA_OK) {
+		std::cerr << "Couldn't call Lua function : " << name << " : " << lua_tostring(L, -1) << std::endl;
+		throw std::runtime_error("Couldn't call Lua function");
+	}
+	if constexpr (!std::is_void_v<T>) {
 		T value = lua_get<T>(L, -1);
-		lua_pop(L, 1);
 		return value;
 	}
 	else {
-		if (lua_pcall(L, sizeof...(args), 0, 0) != LUA_OK) {
-			std::cerr << "Couldn't call Lua function : " << name << std::endl;
-			throw std::runtime_error("Couldn't call Lua function");
-		}
 		return T{};
 	}
 }
 
 template <typename T>
 T LuaManager::GetVariable(const char* name) {
-	lua_getglobal(L, name);
-	T value = lua_get<T>(L, -1);
-	lua_pop(L, 1);
-	return value;
+	GetFields(name);
+	T answer = lua_get<T>(L, -1);
+	return answer;
 }
 
-template <typename T>
-void LuaManager::GetTable(T* var, const char* varName) {
-	if (lua_istable(L, -1)) {
-		lua_getfield(L, -1, varName);
-		*var = lua_get<T>(L, -1);
-		lua_pop(L, 1);
-	}
+template<typename T>
+void LuaManager::SetVariable(std::string name, T value) {
+	GetFields(name.erase(name.size() - name.find_last_of('.')));
+	lua_push<T>(L, value);
+	lua_setfield(L, -2, name.substr(name.find_last_of('.') + 1).c_str());
+	lua_pop(L, 1);
 }

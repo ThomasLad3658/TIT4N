@@ -6,30 +6,51 @@
 
 class Entity {
 public:
-	Entity(std::string path, const SDL_FRect& src, const SDL_FRect& dst);
+	Entity(
+		std::string tag, 
+		int refenceIndex,
+		std::string filepath, 
+		const SDL_FRect& src, 
+		const SDL_FRect& dst
+	);
 	~Entity();
 	void Init(SDL_Renderer* sdlRenderer);
+	void destroy();
 	bool present();
+	void Update(float dt);
+	void PlayAnimation(std::string animationName, bool direction);
 	bool isInitialized() const;
-	void setPosition(float x, float y);
-	void setRenderLayer(char z);
+	void setRenderLayer(unsigned char z);
 	SDL_FRect getDstRect() const;
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;
-	unsigned int getId();
+	unsigned int getId() const;
 
 protected:
-	bool initialized = false;
 	std::string filepath;
 	SDL_Renderer* renderer;
 	SDL_Texture* texture;
+
 	SDL_FRect srcrect;
 	SDL_FRect dstrect;
 	SDL_FRect hitbox;
+
+	int animationRow = 0;
+	int animationFrameCount = 0;
+	int animationCurrentFrame = 0;
+	int animationFPS = 0;
+	bool animationLoop = true;
+	bool mirroredH = false;
+	bool mirroredV = false;
+	double angle = 0;
+	float animationTimer = 0;
+
 	std::string tag;
 	unsigned char renderLayer;
 	bool isStatic;
-	bool hasScript;
+	bool initialized = false;
+
 	unsigned int id;
+	int referenceIndex;
 	static inline unsigned int nextId = 0;
 };

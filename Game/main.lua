@@ -1,6 +1,3 @@
-CreateWindow("TIT4N",  640, 360)
-
-table = {
-var = 100,
-var1 = 200
-}
+CreateWindow("TIT4N",  1000, 800)
+SetFrameRate(60)
+LoadLevel("level1")
