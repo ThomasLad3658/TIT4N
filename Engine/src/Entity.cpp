@@ -99,7 +99,7 @@ void Entity::Update(float dt)
 		while (animationTimer >= frameDuration) {
 			animationTimer -= frameDuration;
 			animationCurrentFrame++;
-			if (animationCurrentFrame > animationFrameCount) {
+			if (animationCurrentFrame >= animationFrameCount) {
 				if (animationLoop) {
 					animationCurrentFrame = 0;
 				}
@@ -108,7 +108,7 @@ void Entity::Update(float dt)
 				}
 			}
 		}
-		srcrect.x = srcrect.w * (animationCurrentFrame - 1);
+		srcrect.x = srcrect.w * animationCurrentFrame;
 		srcrect.y = srcrect.h * animationRow;
 	}
 }
