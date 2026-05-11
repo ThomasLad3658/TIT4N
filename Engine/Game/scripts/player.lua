@@ -2,6 +2,8 @@ player = {
 	-- Generic properties
     path     = "Game/assets/sprites/player/Soldier.png",
     x = 0, y = 0, z = 0,
+    angle = 0,
+    mirroredH = false, mirroredV = false,
     srcrect  = { x = 0, y = 0, w = 100, h = 100 },
     dstScale = 5,
     visible  = true,
@@ -9,17 +11,16 @@ player = {
     tags	 = { "player", "character" },
     hitboxs  = { { ox = 0, oy = 0, w = 100, h = 100 } },
     paused = false,
+    action = "Idle",
     animations = {
-        Idle = { row = 0, frameCount = 7, fps = 8, loop = true  },
-        Walk = { row = 1, frameCount = 5, fps = 10, loop = true  },
-        Attack = { row = 2, frameCount = 4, fps = 12, loop = false },
+        Idle = { row = 0, frameCount = 6, fps = 9, loop = true  },
+        Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
+        Attack = { row = 2, frameCount = 6, fps = 12, loop = false },
     },
 
     -- Custom properties
     hp    = 100,
-    speed = 75,
-
-    -- Animations
+    speed = 75
 }
 
 player.__index = player
@@ -36,50 +37,44 @@ function player:new(overrides)
 end
 
 function player:OnInit()
-	--Empty
+	self.Play(self.action)
 end
 
 function player:OnUpdate(dt)
-    local action = "Idle"
+    local newAction = "Idle"
 	local dx = 0
     local dy = 0
     local temp = 100
 
     if GetKeyState("W") == 2 or GetKeyState("W") == 1 then
         dy = dy - self.speed * dt
-        action = "Walk"
+        newAction = "Walk"
     end
     if GetKeyState("S") == 2 or GetKeyState("S") == 1 then
         dy = dy + self.speed * dt
-        action = "Walk"
+        newAction = "Walk"
     end
     if GetKeyState("A") == 2 or GetKeyState("A") == 1 then
         dx = dx - self.speed * dt
-        action = "Walk"
+        newAction = "Walk"
     end
     if GetKeyState("D") == 2 or GetKeyState("D") == 1 then
         dx = dx + self.speed * dt
-        action = "Walk"
+        newAction = "Walk"
     end
     self.x = self.x + dx
     self.y = self.y + dy
 
-    temp = temp - dt
-    if temp <= 0 then 
-        self.srcrect.x = self.srcrect.x + 100
-        temp = temp + 100
+    -- Animations things
+    if dx < 0 then
+        self.mirroredH = true
+    else if dx > 0 then
+            self.mirroredH = false
+        end
     end
-
-    if action == "Walk" then
-        self.srcrect.y = 100
-        if self.srcrect.x >= 500 then
-            self.srcrect.x = 0
-        end
-    else
-        self.srcrect.y = 0
-        if self.srcrect.x >= 700 then
-            self.srcrect.x = 0
-        end
+    if newAction ~= self.action then
+        self.action = newAction
+        self.Play(self.action)
     end
 end
 

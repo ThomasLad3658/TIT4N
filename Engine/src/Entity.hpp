@@ -18,7 +18,7 @@ public:
 	void destroy();
 	bool present();
 	void Update(float dt);
-	void PlayAnimation(std::string animationName);
+	void PlayAnimation(std::string animationName, bool direction);
 	bool isInitialized() const;
 	void setRenderLayer(unsigned char z);
 	SDL_FRect getDstRect() const;
@@ -40,6 +40,10 @@ protected:
 	int animationCurrentFrame = 0;
 	int animationFPS = 0;
 	bool animationLoop = true;
+	bool mirroredH = false;
+	bool mirroredV = false;
+	double angle = 0;
+	float animationTimer = 0;
 
 	std::string tag;
 	unsigned char renderLayer;

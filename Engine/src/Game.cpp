@@ -169,7 +169,7 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 			dstScale * h
 		}
 	);
-	//luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::setRenderLayer, objPath.c_str(), "setRenderLayer");
+	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::PlayAnimation, objPath.c_str(), "Play");
 	return std::move(entity);
 
 }

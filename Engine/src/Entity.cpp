@@ -47,7 +47,12 @@ bool Entity::isInitialized() const {
 bool Entity::present()
 {
 	if (initialized == false) return false;
-	if (!SDL_RenderTexture(renderer, texture, &srcrect, &dstrect)) {
+	SDL_FlipMode flip = SDL_FLIP_NONE;
+	if (mirroredH && mirroredV) flip = SDL_FLIP_HORIZONTAL_AND_VERTICAL;
+	else if(mirroredH) flip = SDL_FLIP_HORIZONTAL;
+	else if(mirroredV) flip = SDL_FLIP_VERTICAL;
+	
+	if (!SDL_RenderTextureRotated(renderer, texture, &srcrect, &dstrect, angle, nullptr, flip)) {
 		std::cerr << "Failed to render entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
 		throw std::runtime_error("entity texture rendering failed");
 	}
@@ -57,8 +62,6 @@ bool Entity::present()
 void Entity::Update(float dt)
 {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
-
-	dstrect.w = 400;
 
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.x", srcrect.x);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.y", srcrect.y);
@@ -85,16 +88,40 @@ void Entity::Update(float dt)
 		dstScale* srcrect.w,
 		dstScale* srcrect.h
 	};
+	angle = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".angle").c_str());
+	mirroredH = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredH").c_str());
+	mirroredV = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredV").c_str());
+	
+	// Update animations
+	if (animationFrameCount > 0) {
+		animationTimer += dt;
+		float frameDuration = 1.0f / animationFPS;
+		while (animationTimer >= frameDuration) {
+			animationTimer -= frameDuration;
+			animationCurrentFrame++;
+			if (animationCurrentFrame > animationFrameCount) {
+				if (animationLoop) {
+					animationCurrentFrame = 0;
+				}
+				else {
+					animationCurrentFrame = animationFrameCount - 1;
+				}
+			}
+		}
+		srcrect.x = srcrect.w * (animationCurrentFrame - 1);
+		srcrect.y = srcrect.h * animationRow;
+	}
 }
 
-void Entity::PlayAnimation(std::string animationName) {
+void Entity::PlayAnimation(std::string animationName, bool direction) {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
-	std::string animationPath = "/" + std::to_string(referenceIndex) + "animations." + animationName;
+	std::string animationPath = "/" + std::to_string(referenceIndex) + ".animations." + animationName;
 	animationRow = luaManager->GetVariable<int>((animationPath + ".row").c_str());
 	animationFrameCount = luaManager->GetVariable<int>((animationPath + ".frameCount").c_str());
 	animationFPS = luaManager->GetVariable<int>((animationPath + ".fps").c_str());
 	animationLoop = luaManager->GetVariable<bool>((animationPath + ".loop").c_str());
 	animationCurrentFrame = 0;
+	animationTimer = 0;
 }
 
 void Entity::setRenderLayer(unsigned char z) {
