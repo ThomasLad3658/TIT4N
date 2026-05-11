@@ -9,6 +9,7 @@
 Game* ServiceLocator::game = nullptr;
 SceneManager* ServiceLocator::sceneManager = nullptr;
 RenderSystem* ServiceLocator::renderSystem = nullptr;
+SoundSystem* ServiceLocator::soundSystem = nullptr;
 PhysicsSystem* ServiceLocator::physicsSystem = nullptr;
 LuaManager* ServiceLocator::luaManager = nullptr;
 InputManager* ServiceLocator::inputManager = nullptr;
@@ -23,6 +24,10 @@ void ServiceLocator::registerSceneManager(SceneManager* sm) {
 
 void ServiceLocator::registerRenderSystem(RenderSystem* rs) {
 	renderSystem = rs;
+}
+
+void ServiceLocator::registerSoundSystem(SoundSystem* ss) {
+	soundSystem = ss;
 }
 
 void ServiceLocator::registerPhysicsSystem(PhysicsSystem* ps) {
@@ -47,6 +52,10 @@ SceneManager* ServiceLocator::getSceneManager() {
 
 RenderSystem* ServiceLocator::getRenderSystem() {
 	return renderSystem;
+}
+
+SoundSystem* ServiceLocator::getSoundSystem() {
+	return soundSystem;
 }
 
 PhysicsSystem* ServiceLocator::getPhysicsSystem() {

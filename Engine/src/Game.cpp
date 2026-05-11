@@ -9,6 +9,7 @@
 #include "InputManager.hpp"
 #include "Entity.hpp"
 #include "Common.hpp"
+#include "SoundSystem.hpp"
 
 Game::Game() {
 	std::cout << "Initializing Game...\n";
@@ -27,6 +28,7 @@ Game::Game() {
 
 	sceneManager = std::make_unique<SceneManager>(&entities);
 	renderSystem = std::make_unique<RenderSystem>(&entities);
+	soundSystem = std::make_unique<SoundSystem>();
 	physicsSystem = std::make_unique<PhysicsSystem>();
 	luaManager = std::make_unique<LuaManager>();
 	inputManager = std::make_unique<InputManager>();
@@ -34,6 +36,7 @@ Game::Game() {
 	ServiceLocator::registerGame(this);
 	ServiceLocator::registerSceneManager(sceneManager.get());
 	ServiceLocator::registerRenderSystem(renderSystem.get());
+	ServiceLocator::registerSoundSystem(soundSystem.get());
 	ServiceLocator::registerPhysicsSystem(physicsSystem.get());
 	ServiceLocator::registerLuaManager(luaManager.get());
 	ServiceLocator::registerInputManager(inputManager.get());
@@ -62,6 +65,16 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
 	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadLevel, "LoadLevel");
 	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetKeyState, "GetKeyState");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::createSound, "CreateSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::play, "PlaySound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::playFrom, "PlaySoundFrom");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::playFromTo, "PlaySoundFromTo");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::isPlaying, "IsSoundPlaying");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::stop, "StopSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::resume, "ResumeSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::pause, "PauseSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::loop, "LoopSound");
+
 
 	luaManager->DoFile((getBasePath() + "Game/main.lua").c_str());
 	if (!window) {
@@ -103,6 +116,7 @@ void Game::Run() {
 			// Not precise enough
 			//SDL_Delay((frameDelay - frameTime) / 1000000);
 		}
+		soundSystem->update();
 	}
 }
 

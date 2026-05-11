@@ -12,6 +12,7 @@ class PhysicsSystem;
 class LuaManager;
 class Entity;
 class InputManager;
+class SoundSystem;
 
 class Game {
 public:
@@ -34,6 +35,7 @@ private:
 	SDL_Window* window;
 	std::unique_ptr<SceneManager> sceneManager;
 	std::unique_ptr<RenderSystem> renderSystem;
+	std::unique_ptr<SoundSystem> soundSystem;
 	std::unique_ptr<PhysicsSystem> physicsSystem;
 	std::unique_ptr<LuaManager> luaManager;
 	std::vector<std::unique_ptr<Entity>> entities;
