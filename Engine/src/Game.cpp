@@ -48,6 +48,16 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::CreateWindow, "CreateWindow");
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::createSound, "CreateSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::play, "PlaySound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::playFrom, "PlaySoundFrom");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::playFromTo, "PlaySoundFromTo");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::isPlaying, "IsSoundPlaying");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::stop, "StopSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::resume, "ResumeSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::pause, "PauseSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::loop, "LoopSound");
+
 
 	const char* basePath = SDL_GetBasePath();
 	if (!basePath) {
@@ -65,12 +75,6 @@ void Game::Run() {
 		{ 0.0f, 0.0f, 500.0f, 500.0f }
 	);
 	renderSystem->registerEntity(entity);
-
-	int sound = soundSystem->createSound(std::string(basePath) + "Game/assets/sounds/example.wav");
-	if (sound != -1) {
-		soundSystem->loop(sound, true);
-		soundSystem->play(sound);
-	}
 	
 	SDL_Event event;
 	running = true;

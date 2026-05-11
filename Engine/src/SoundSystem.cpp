@@ -8,32 +8,29 @@ SoundSystem::~SoundSystem() {
 }
 
 int SoundSystem::createSound(const std::string& filePath) {
-    return createSound(filePath, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
+    return createSoundWithDev(filePath, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
 }
 
-int SoundSystem::createSound(const std::string& filePath, SDL_AudioDeviceID dev) {
-    std::unique_ptr<Sound> sound = std::make_unique<Sound>(filePath, dev);
-    if (registerSound(std::move(sound))) {
-        return sounds.size() - 1;
+int SoundSystem::createSoundWithDev(const std::string& filePath, SDL_AudioDeviceID dev) {
+    auto sound = std::make_unique<Sound>(filePath, dev);
+    if (!sound->isUsable()) return -1;
+
+    // Reuse a null slot if available
+    for (int i = 0; i < (int)sounds.size(); i++) {
+        if (!sounds[i]) {
+            sounds[i] = std::move(sound);
+            return i;
+        }
     }
-    return -1;
+
+    sounds.push_back(std::move(sound));
+    return (int)sounds.size() - 1;
 }
 
 void SoundSystem::update() {
-    for (int i = sounds.size() - 1; i >= 0; i--) {
-        sounds[i]->update();
-        if (!sounds[i]->isUsable()) {
-            sounds.erase(sounds.begin() + i);
-        }
+    for (auto& sound : sounds) {
+        if (sound) sound->update();
     }
-}
-
-bool SoundSystem::registerSound(std::unique_ptr<Sound> sound) {
-    if (sound->isUsable()) {
-        sounds.push_back(std::move(sound));
-        return true;
-    }
-    return false;
 }
 
 bool SoundSystem::exists(int soundId) {
@@ -52,7 +49,17 @@ bool SoundSystem::unregisterSound(int soundId) {
 
 void SoundSystem::play(int soundId) {
     if (!exists(soundId)) return;
-    return sounds[soundId]->play();
+    sounds[soundId]->play();
+}
+
+void SoundSystem::playFrom(int soundId, int startMs) {
+    if (!exists(soundId)) return;
+    sounds[soundId]->play(startMs);
+}
+
+void SoundSystem::playFromTo(int soundId, int startMs, int endMs) {
+    if (!exists(soundId)) return;
+    sounds[soundId]->play(startMs, endMs);
 }
 
 bool SoundSystem::isPlaying(int soundId) {
@@ -78,4 +85,14 @@ void SoundSystem::pause(int soundId) {
 void SoundSystem::loop(int soundId, bool loop) {
     if (!exists(soundId)) return;
     sounds[soundId]->loop = loop;
+}
+
+Uint64 SoundSystem::getStartTick(int soundId) {
+    if (!exists(soundId)) return 0;
+    return sounds[soundId]->getStartTick();
+}
+
+Uint64 SoundSystem::getEndTick(int soundId) {
+    if (!exists(soundId)) return 0;
+    return sounds[soundId]->getEndTick();
 }
