@@ -7,11 +7,11 @@ SoundSystem::~SoundSystem() {
     sounds.clear();
 }
 
-int SoundSystem::createSound(const std::string& filePath) {
+int SoundSystem::createSound(std::string filePath) {
     return createSoundWithDev(filePath, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
 }
 
-int SoundSystem::createSoundWithDev(const std::string& filePath, SDL_AudioDeviceID dev) {
+int SoundSystem::createSoundWithDev(std::string filePath, SDL_AudioDeviceID dev) {
     auto sound = std::make_unique<Sound>(filePath, dev);
     if (!sound->isUsable()) return -1;
 

@@ -20,7 +20,7 @@ player = {
 
     -- Custom properties
     hp    = 100,
-    speed = 75
+    speed = 100
 }
 
 player.__index = player
@@ -44,8 +44,8 @@ function player:OnUpdate(dt)
     local newAction = "Idle"
 	local dx = 0
     local dy = 0
-    local temp = 100
 
+    -- Movements
     if GetKeyState("W") == 2 or GetKeyState("W") == 1 then
         dy = dy - self.speed * dt
         newAction = "Walk"
@@ -65,7 +65,9 @@ function player:OnUpdate(dt)
     self.x = self.x + dx
     self.y = self.y + dy
 
-    -- Animations things
+    -- Collisions
+
+    -- Animations
     if dx < 0 then
         self.mirroredH = true
     else if dx > 0 then

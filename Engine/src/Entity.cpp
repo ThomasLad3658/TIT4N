@@ -88,6 +88,12 @@ void Entity::Update(float dt)
 		dstScale* srcrect.w,
 		dstScale* srcrect.h
 	};
+	hitbox = {
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.ox").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.oy").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.w").c_str()),
+		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.h").c_str())
+	};
 	angle = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".angle").c_str());
 	mirroredH = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredH").c_str());
 	mirroredV = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredV").c_str());
@@ -142,4 +148,13 @@ unsigned char Entity::getRenderLayer() const {
 
 unsigned int Entity::getId() const {
 	return id;
+}
+
+SDL_FRect Entity::getHitbox() const {
+	return SDL_FRect{
+		dstrect.x + hitbox.x,
+		dstrect.y + hitbox.y,
+		hitbox.w,
+		hitbox.h
+	};
 }

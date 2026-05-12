@@ -29,7 +29,7 @@ Game::Game() {
 	sceneManager = std::make_unique<SceneManager>(&entities);
 	renderSystem = std::make_unique<RenderSystem>(&entities);
 	soundSystem = std::make_unique<SoundSystem>();
-	physicsSystem = std::make_unique<PhysicsSystem>();
+	physicsSystem = std::make_unique<PhysicsSystem>(&entities);
 	luaManager = std::make_unique<LuaManager>();
 	inputManager = std::make_unique<InputManager>();
 

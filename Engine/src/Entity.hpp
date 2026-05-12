@@ -25,6 +25,7 @@ public:
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;
 	unsigned int getId() const;
+	SDL_FRect getHitbox() const;
 
 protected:
 	std::string filepath;

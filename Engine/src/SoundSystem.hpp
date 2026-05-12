@@ -10,8 +10,8 @@ public:
 	SoundSystem();
 	~SoundSystem();
 	void update();
-	int createSound(const std::string& filePath);
-	int createSoundWithDev(const std::string& filePath, SDL_AudioDeviceID dev);
+	int createSound(std::string filePath);
+	int createSoundWithDev(std::string filePath, SDL_AudioDeviceID dev);
 	bool exists(int soundId);
 	void play(int soundId);
 	void playFrom(int soundId, int startMs);
