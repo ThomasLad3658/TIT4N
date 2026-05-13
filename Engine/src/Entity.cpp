@@ -62,7 +62,7 @@ bool Entity::present()
 void Entity::Update(float dt)
 {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
-
+	/*
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.x", srcrect.x);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.y", srcrect.y);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.w", srcrect.w);
@@ -72,7 +72,7 @@ void Entity::Update(float dt)
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".y", dstrect.y);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".w", dstrect.w);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".h", dstrect.h);
-
+	*/
 	luaManager->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnUpdate").c_str(), true, dt);
 
 	float dstScale = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str());
@@ -130,12 +130,16 @@ void Entity::PlayAnimation(std::string animationName, bool direction) {
 	animationTimer = 0;
 }
 
+void Entity::CalculateCollisions() {
+	// Send entity ptr to physics system and let it change dx, dy and change x and y accordingly. Then send the new x and y to lua and let it decide what to do with it.
+}
+
 void Entity::setRenderLayer(unsigned char z) {
 	renderLayer = z;
 }
 
-SDL_FRect Entity::getDstRect() const {
-	return dstrect;
+SDL_FRect* Entity::getDstRect() {
+	return &dstrect;
 }
 
 std::string Entity::getTag() const {

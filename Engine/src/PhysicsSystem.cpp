@@ -1,7 +1,20 @@
 #include "PhysicsSystem.hpp"
 #include "Entity.hpp"
 
-PhysicsSystem::PhysicsSystem(std::vector<std::unique_ptr<Entity>>* entities) : entities(entities) {
+PhysicsSystem::PhysicsSystem(std::vector<std::unique_ptr<Entity>>* entities) : entities(entities) 
+{}
+
+void PhysicsSystem::CheckCollisions() {
+	collisions.clear();
+	for (int i = 0; i < entities->size(); i++) {
+		for (int j = i + 1; j < entities->size(); j++) {
+			collisions.push_back({ Overlap((*entities)[i].get()->getDstRect(), (*entities)[j].get()->getDstRect()), {} });
+		}
+	}
+}
+
+void PhysicsSystem::Update()
+{
 }
 
 bool PhysicsSystem::Overlap(SDL_FRect* rect1, SDL_FRect* rect2) {

@@ -97,10 +97,15 @@ void Game::Run() {
 				break;
 			}
 		}
+
 		float dtSeconds = dt / 1000000000.0f;
+
 		for (auto& entity : entities) {
 			entity->Update(dtSeconds);
 		}
+
+		// Apply physics
+
 		renderSystem->render();
 
 		inputManager->EndOfFrame();

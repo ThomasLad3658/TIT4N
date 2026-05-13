@@ -181,7 +181,8 @@ T LuaManager::GetVariable(const char* name) {
 
 template<typename T>
 void LuaManager::SetVariable(std::string name, T value) {
-	GetFields(name.erase(name.size() - name.find_last_of('.')));
+	std::string field = name;
+	GetFields(field.erase(field.size() - field.find_last_of('.')));
 	lua_push<T>(L, value);
 	lua_setfield(L, -2, name.substr(name.find_last_of('.') + 1).c_str());
 	lua_pop(L, 1);

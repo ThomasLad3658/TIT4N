@@ -1,26 +1,32 @@
 player = {
-	-- Generic properties
+-- Generic properties ( all required)
+    -- Graphic infos
     path     = "Game/assets/sprites/player/Soldier.png",
-    x = 0, y = 0, z = 0,
-    angle = 0,
-    mirroredH = false, mirroredV = false,
-    srcrect  = { x = 0, y = 0, w = 100, h = 100 },
-    dstScale = 5,
-    visible  = true,
-    rotation = 0,
-    tags	 = { "player", "character" },
-    hitboxs  = { { ox = 0, oy = 0, w = 100, h = 100 } },
-    paused = false,
     action = "Idle",
+    mirroredH = false, mirroredV = false,
+    visible  = true,
     animations = {
         Idle = { row = 0, frameCount = 6, fps = 9, loop = true  },
         Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
         Attack = { row = 2, frameCount = 6, fps = 12, loop = false },
     },
 
-    -- Custom properties
+    -- Position infos
+    x = 0, y = 0, z = 0,
+    dx = 0, dy = 0,
+    angle = 0,
+    srcrect  = { x = 0, y = 0, w = 100, h = 100 },
+    dstScale = 5,
+    rotation = 0,
+
+    -- Behavior infos
+    tags	 = { "player", "character" },
+    hitboxs  = { { ox = 0, oy = 0, w = 100, h = 100 } },
+    paused = false,
+
+-- Custom properties (optional properties) do what you want here
     hp    = 100,
-    speed = 75
+    speed = 100
 }
 
 player.__index = player
@@ -42,10 +48,10 @@ end
 
 function player:OnUpdate(dt)
     local newAction = "Idle"
-	local dx = 0
-    local dy = 0
-    local temp = 100
+    dx = 0
+    dy = 0
 
+    -- Movements
     if GetKeyState("W") == 2 or GetKeyState("W") == 1 then
         dy = dy - self.speed * dt
         newAction = "Walk"
@@ -64,8 +70,8 @@ function player:OnUpdate(dt)
     end
     self.x = self.x + dx
     self.y = self.y + dy
-
-    -- Animations things
+    
+    -- Animations
     if dx < 0 then
         self.mirroredH = true
     else if dx > 0 then
@@ -76,6 +82,10 @@ function player:OnUpdate(dt)
         self.action = newAction
         self.Play(self.action)
     end
+end
+
+function OnCollision()
+    --Empty
 end
 
 function player:OnDestroy()

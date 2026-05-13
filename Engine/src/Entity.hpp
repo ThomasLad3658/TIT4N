@@ -19,9 +19,10 @@ public:
 	bool present();
 	void Update(float dt);
 	void PlayAnimation(std::string animationName, bool direction);
+	void CalculateCollisions();
 	bool isInitialized() const;
 	void setRenderLayer(unsigned char z);
-	SDL_FRect getDstRect() const;
+	SDL_FRect* getDstRect();
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;
 	unsigned int getId() const;
