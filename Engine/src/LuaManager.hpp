@@ -80,6 +80,9 @@ void lua_push<bool>(lua_State* L, bool value);
 template <>
 void lua_push<const char*>(lua_State* L, const char* value);
 
+template <>
+void lua_push<std::string>(lua_State* L, std::string value);
+
 template <typename R, typename O, typename... Args, size_t... I>
 void LuaManager::RegisterHelper(O* obj, R(O:: * func)(Args...), std::index_sequence<I...>, const char* name) {
 	std::shared_ptr funcPtr = std::make_shared<R(O::*)(Args...)>(func);
@@ -176,6 +179,7 @@ template <typename T>
 T LuaManager::GetVariable(const char* name) {
 	GetFields(name);
 	T answer = lua_get<T>(L, -1);
+	lua_pop(L, 1);
 	return answer;
 }
 

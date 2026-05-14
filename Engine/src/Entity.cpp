@@ -46,7 +46,7 @@ bool Entity::isInitialized() const {
 
 bool Entity::present()
 {
-	if (initialized == false) return false;
+	if (initialized == false || visible == false) return false;
 	SDL_FlipMode flip = SDL_FLIP_NONE;
 	if (mirroredH && mirroredV) flip = SDL_FLIP_HORIZONTAL_AND_VERTICAL;
 	else if(mirroredH) flip = SDL_FLIP_HORIZONTAL;
@@ -97,6 +97,8 @@ void Entity::Update(float dt)
 	angle = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".angle").c_str());
 	mirroredH = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredH").c_str());
 	mirroredV = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredV").c_str());
+	renderLayer = luaManager->GetVariable<int>(("/" + std::to_string(referenceIndex) + ".z").c_str());
+	visible = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".visible").c_str());
 	
 	// Update animations
 	if (animationFrameCount > 0) {
@@ -130,8 +132,8 @@ void Entity::PlayAnimation(std::string animationName, bool direction) {
 	animationTimer = 0;
 }
 
-void Entity::CalculateCollisions() {
-	// Send entity ptr to physics system and let it change dx, dy and change x and y accordingly. Then send the new x and y to lua and let it decide what to do with it.
+void Entity::Collisions(std::string tag, SDL_FRect overlap) {
+	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnCollision").c_str(), true, tag, overlap.x, overlap.y, overlap.w, overlap.h);
 }
 
 void Entity::setRenderLayer(unsigned char z) {

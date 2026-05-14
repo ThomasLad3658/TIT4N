@@ -67,6 +67,11 @@ void lua_push<const char*>(lua_State* L, const char* value) {
 	lua_pushstring(L, value);
 }
 
+template<>
+void lua_push(lua_State* L, std::string value) {
+	lua_pushstring(L, value.c_str());
+}
+
 LuaManager::LuaManager() {
 	L = luaL_newstate();
 	luaL_openlibs(L);

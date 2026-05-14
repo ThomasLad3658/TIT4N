@@ -19,7 +19,7 @@ public:
 	bool present();
 	void Update(float dt);
 	void PlayAnimation(std::string animationName, bool direction);
-	void CalculateCollisions();
+	void Collisions(std::string tag, SDL_FRect overlap);
 	bool isInitialized() const;
 	void setRenderLayer(unsigned char z);
 	SDL_FRect* getDstRect();
@@ -44,6 +44,7 @@ protected:
 	bool animationLoop = true;
 	bool mirroredH = false;
 	bool mirroredV = false;
+	bool visible = true;
 	double angle = 0;
 	float animationTimer = 0;
 

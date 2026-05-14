@@ -104,7 +104,7 @@ void Game::Run() {
 			entity->Update(dtSeconds);
 		}
 
-		// Apply physics
+		physicsSystem->Update();
 
 		renderSystem->render();
 

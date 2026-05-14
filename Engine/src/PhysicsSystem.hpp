@@ -15,6 +15,7 @@ public:
 private:
 	std::vector<std::unique_ptr<Entity>>* entities;
 	std::vector<CollisionInfo> collisions;
-	bool Overlap(SDL_FRect* rect1, SDL_FRect* rect2);
+	bool isOverlap(SDL_FRect* rect1, SDL_FRect* rect2);
+	SDL_FRect getOverlap(SDL_FRect* rect1, SDL_FRect* rect2);
 };
 
