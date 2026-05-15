@@ -14,6 +14,7 @@ player = {
     -- Position infos
     x = 0, y = 0, z = 0,
     dx = 0, dy = 0,
+    ax = 0, ay = 0,
     angle = 0,
     srcrect  = { x = 0, y = 0, w = 100, h = 100 },
     dstScale = 5,
@@ -22,8 +23,11 @@ player = {
     hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
 
 -- Custom properties (optional properties) do what you want here
-    hp    = 100,
-    speed = 100
+    maxSpeed = 100,
+    speed = 50,
+    friction = 30,
+    jumpStrength = 200,
+    isGrounded = false
 }
 
 player.__index = player
@@ -57,26 +61,44 @@ function player:OnUpdate(dt)
     self.dy = 0
 
     -- Movements
-    if GetKeyState("W") == 2 or GetKeyState("W") == 1 then
-        self.dy = self.dy - self.speed * dt
-        newAction = "Walk"
+    local KeyA = GetKeyState("A")
+    local KeyB = GetKeyState("D")
+    local KeySpace = GetKeyState("Space")
+    if KeyA == 2 or KeyA == 1 then
+        self.ax = self.ax - self.speed * dt
     end
-    if GetKeyState("S") == 2 or GetKeyState("S") == 1 then
-        self.dy = self.dy + self.speed * dt
-        newAction = "Walk"
+    if KeyB == 2 or KeyB == 1 then
+        self.ax = self.ax + self.speed * dt
     end
-    if GetKeyState("A") == 2 or GetKeyState("A") == 1 then
-        self.dx = self.dx - self.speed * dt
-        newAction = "Walk"
+    if (KeySpace == 2 or KeySpace == 1) and self.isGrounded then
+        self.ay = self.ay + self.jumpStrength * dt
     end
-    if GetKeyState("D") == 2 or GetKeyState("D") == 1 then
-        self.dx = self.dx + self.speed * dt
-        newAction = "Walk"
+    if KeyA == 0 and KeyB == 0 then
+        if self.ax > 0 then
+            self.ax = math.max(0, self.ax - self.friction * dt)
+        else if self.ax < 0 then
+                self.ax = math.min(0, self.ax + self.friction * dt)
+            end
+        end
     end
+
+    self.ax = math.max(-self.maxSpeed, math.min(self.ax, self.maxSpeed))
+    self.ay = math.max(-self.maxSpeed, math.min(self.ay, self.maxSpeed))
+
+    self.ay = self.ay + 30 * dt
+
+    self.dx = self.dx + self.ax
+    self.dy = self.dy + self.ay
+
     self.x = self.x + self.dx
     self.y = self.y + self.dy
     
+    self.isGrounded = false
+
     -- Animations
+    if ax ~=0 then
+        newAction = "Walk"
+    end
     if self.dx < 0 then
         self.mirroredH = true
     else if self.dx > 0 then
@@ -92,27 +114,32 @@ end
 function player:OnCollision(tag, overlapX, overlapY, overlapW, overlapH)
     if tag == "wall" then
         if overlapW < overlapH then
-            if self.dx > 0 then
+            if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
                 self.x = self.x - overlapW
+                self.ax = math.min(self.ax, 0)
             else
                 self.x = self.x + overlapW
+                self.ax = math.max(self.ax, 0)
             end
         else
-            if self.dy > 0 then
+            if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
                 self.y = self.y - overlapH
+                self.isGrounded = true
+                self.ay = math.min(self.ay, 0)
             else
                 self.y = self.y + overlapH
+                self.ay = math.max(self.ay, 0)
             end
         end
-    elseif tag == "enemy" then
+    elseif tag == "player" then
         if overlapW < overlapH then
-            if self.dx > 0 then
+            if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
                 self.x = self.x - overlapW/2
             else
                 self.x = self.x + overlapW/2
             end
         else
-            if self.dy > 0 then
+            if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
                 self.y = self.y - overlapH/2
             else
                 self.y = self.y + overlapH/2

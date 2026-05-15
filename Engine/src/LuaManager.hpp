@@ -168,6 +168,7 @@ T LuaManager::callFunction(const char* name, bool requiresSelf, Args... args) {
 	}
 	if constexpr (!std::is_void_v<T>) {
 		T value = lua_get<T>(L, -1);
+		lua_pop(L, 1);
 		return value;
 	}
 	else {
