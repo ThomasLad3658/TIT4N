@@ -14,7 +14,6 @@ player = {
     -- Position infos
     x = 0, y = 0, z = 0,
     dx = 0, dy = 0,
-    ax = 0, ay = 0,
     angle = 0,
     srcrect  = { x = 0, y = 0, w = 100, h = 100 },
     dstScale = 5,
@@ -23,10 +22,10 @@ player = {
     hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
 
 -- Custom properties (optional properties) do what you want here
-    maxSpeed = 100,
-    speed = 50,
+    maxSpeed = 30,
+    speed = 20,
     friction = 30,
-    jumpStrength = 200,
+    jumpStrength = 500,
     isGrounded = false
 }
 
@@ -57,38 +56,34 @@ end
 
 function player:OnUpdate(dt)
     local newAction = "Idle"
-    self.dx = 0
-    self.dy = 0
 
     -- Movements
     local KeyA = GetKeyState("A")
     local KeyB = GetKeyState("D")
     local KeySpace = GetKeyState("Space")
+
     if KeyA == 2 or KeyA == 1 then
-        self.ax = self.ax - self.speed * dt
+        self.dx = self.dx - self.speed * dt
     end
     if KeyB == 2 or KeyB == 1 then
-        self.ax = self.ax + self.speed * dt
+        self.dx = self.dx + self.speed * dt
     end
-    if (KeySpace == 2 or KeySpace == 1) and self.isGrounded then
-        self.ay = self.ay + self.jumpStrength * dt
+    if KeySpace == 2 and self.isGrounded then
+        self.dy = self.dy - self.jumpStrength * dt
     end
+
     if KeyA == 0 and KeyB == 0 then
-        if self.ax > 0 then
-            self.ax = math.max(0, self.ax - self.friction * dt)
-        else if self.ax < 0 then
-                self.ax = math.min(0, self.ax + self.friction * dt)
+        if self.dx > 0 then
+            self.dx = math.max(0, self.dx - self.friction * dt)
+        else if self.dx < 0 then
+                self.dx = math.min(0, self.dx + self.friction * dt)
             end
         end
     end
 
-    self.ax = math.max(-self.maxSpeed, math.min(self.ax, self.maxSpeed))
-    self.ay = math.max(-self.maxSpeed, math.min(self.ay, self.maxSpeed))
+    self.dx = math.max(-self.maxSpeed, math.min(self.dx, self.maxSpeed))
 
-    self.ay = self.ay + 30 * dt
-
-    self.dx = self.dx + self.ax
-    self.dy = self.dy + self.ay
+    self.dy = self.dy + 30 * dt
 
     self.x = self.x + self.dx
     self.y = self.y + self.dy
@@ -96,7 +91,7 @@ function player:OnUpdate(dt)
     self.isGrounded = false
 
     -- Animations
-    if ax ~=0 then
+    if self.dx ~= 0 then
         newAction = "Walk"
     end
     if self.dx < 0 then
@@ -116,19 +111,19 @@ function player:OnCollision(tag, overlapX, overlapY, overlapW, overlapH)
         if overlapW < overlapH then
             if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
                 self.x = self.x - overlapW
-                self.ax = math.min(self.ax, 0)
+                self.dx = math.min(self.dx, 0)
             else
                 self.x = self.x + overlapW
-                self.ax = math.max(self.ax, 0)
+                self.dx = math.max(self.dx, 0)
             end
         else
             if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
                 self.y = self.y - overlapH
                 self.isGrounded = true
-                self.ay = math.min(self.ay, 0)
+                self.dy = math.min(self.dy, 0)
             else
                 self.y = self.y + overlapH
-                self.ay = math.max(self.ay, 0)
+                self.dy = math.max(self.dy, 0)
             end
         end
     elseif tag == "player" then
@@ -161,12 +156,13 @@ end
     hitbox
     angle       -> Can cause unexpected behaviour if not specified
     z           -> Can cause unexpected behaviour if not specified
-    All 5 functions
+    new()       -> Never modify, never remove
+    All 4 other functions ( OnInit, OnUpdate, OnCollision, OnDestroy ) -> Crash if not specified, can be empty
 
     -- Optional -> they might cause unexpected behaviour (nil) if not specified or crash in some cases, but they are not required
     mirroredH   -> if not specified, they are set to false by default
     mirroredV   -> if not specified, they are set to false by default
-    visible     -> if not specified, it is set to false by default
+    visible     -> if not specified, it is set to false by default (invisible)
     animations  -> Crash if PlayAnimation is called without this table
     action      -> to help you manage your animations, not used by the engine, but useful for your scripts
     dx, dy      -> to help you manage your movements, not used by the engine, but useful for your scripts
