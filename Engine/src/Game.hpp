@@ -20,6 +20,8 @@ public:
 	~Game();
 	void Run();
 	void CreateWindow(const char* title, int width, int height);
+	bool SetWindowFullscreen(bool fullscreenValue);
+	bool SetWindowBorderless(bool borderlessValue);
 	bool SetWindowTitle(const char* title);
 	bool SetWindowSize(int w, int h);
 	void SetFrameRate(int fps);
@@ -32,6 +34,8 @@ public:
 
 private:
 	bool running = false;
+	bool fullscreen = false;
+	bool borderless = false;
 	SDL_Window* window;
 	std::unique_ptr<SceneManager> sceneManager;
 	std::unique_ptr<RenderSystem> renderSystem;
