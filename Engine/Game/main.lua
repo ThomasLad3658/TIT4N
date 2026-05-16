@@ -1,3 +1,3 @@
-CreateWindow("TIT4N",  1240, 360)
+CreateWindow("TIT4N",  640, 360)
 SetFrameRate(60)
-LoadLevel("level1")
+LoadScene("menus/menu1")

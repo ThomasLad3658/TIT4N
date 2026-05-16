@@ -22,7 +22,7 @@ player = {
     hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
 
 -- Custom properties (optional properties) do what you want here
-    maxSpeed = 30,
+    maxSpeed = 8,
     speed = 20,
     friction = 30,
     jumpStrength = 500,
@@ -58,18 +58,10 @@ function player:OnUpdate(dt)
     local newAction = "Idle"
 
     -- Movements
-    local KeyW = GetKeyState("W")
-    local KeyS = GetKeyState("S")
     local KeyA = GetKeyState("A")
     local KeyB = GetKeyState("D")
     local KeySpace = GetKeyState("Space")
 
-    if KeyW == 2 or KeyW == 1 then
-        self.dy = self.dy - self.speed * dt
-    end
-    if KeyS == 2 or KeyS == 1 then
-        self.dy = self.dy + self.speed * dt
-    end
     if KeyA == 2 or KeyA == 1 then
         self.dx = self.dx - self.speed * dt
     end
@@ -91,10 +83,12 @@ function player:OnUpdate(dt)
 
     self.dx = math.max(-self.maxSpeed, math.min(self.dx, self.maxSpeed))
 
-    --self.dy = self.dy + 30 * dt
+    self.dy = self.dy + 30 * dt
 
     self.x = self.x + self.dx
     self.y = self.y + self.dy
+
+    print(self.dx)
     
     self.isGrounded = false
 

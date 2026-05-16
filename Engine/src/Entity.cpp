@@ -1,4 +1,5 @@
 #include <SDL3_image/SDL_image.h>
+#include "Game.hpp"
 #include "Entity.hpp"
 #include "LuaManager.hpp"
 #include "ServiceLocator.hpp"
@@ -37,7 +38,7 @@ void Entity::Init(SDL_Renderer* sdlRenderer) {
 }
 
 void Entity::destroy() {
-	//
+	ServiceLocator::getGame()->unregisterEntity(this);
 }
 
 bool Entity::isInitialized() const {

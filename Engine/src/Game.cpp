@@ -51,11 +51,11 @@ Game::~Game() {
 
 void Game::Run() {
 	std::cout << "Running Game...\n";
-
+	
 	Uint64 lastTick = SDL_GetTicksNS();
 	Uint64 currentTick = 0;
 	Uint64 dt;
-
+	
 	Uint64 frameStart;
 	Uint64 frameTime;
 
@@ -63,8 +63,9 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
-	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadLevel, "LoadLevel");
+	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadScene, "LoadScene");
 	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetKeyState, "GetKeyState");
+	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetMouseState, "GetMouseState");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::createSound, "CreateSound");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::play, "PlaySound");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::playFrom, "PlaySoundFrom");
@@ -189,8 +190,14 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 		}
 	);
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::PlayAnimation, objPath.c_str(), "Play");
+	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::destroy, objPath.c_str(), "Suicide");
 	return std::move(entity);
 
+}
+
+bool Game::DeleteEntity(Entity* entity) {
+	if (!isEntityRegistered(entity)) return false;
+	return unregisterEntity(entity);
 }
 
 bool Game::registerEntity(std::unique_ptr<Entity> entity) {

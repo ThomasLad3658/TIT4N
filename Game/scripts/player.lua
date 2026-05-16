@@ -22,7 +22,7 @@ player = {
     hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
 
 -- Custom properties (optional properties) do what you want here
-    maxSpeed = 30,
+    maxSpeed = 8,
     speed = 20,
     friction = 30,
     jumpStrength = 500,
@@ -87,6 +87,8 @@ function player:OnUpdate(dt)
 
     self.x = self.x + self.dx
     self.y = self.y + self.dy
+
+    print(self.dx)
     
     self.isGrounded = false
 

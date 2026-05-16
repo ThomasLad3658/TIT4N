@@ -26,6 +26,7 @@ public:
 	std::string getWindowTitle();
 	void getWindowSize(int* width, int* height);
 	std::unique_ptr<Entity> CreateEntity(std::string dataPath);
+	bool DeleteEntity(Entity* entity);
 	bool registerEntity(std::unique_ptr<Entity> entity);
 	bool isEntityRegistered(Entity* entity);
 	bool unregisterEntity(Entity* entity);

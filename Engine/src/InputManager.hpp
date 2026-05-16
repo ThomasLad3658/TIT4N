@@ -9,6 +9,15 @@ public:
 	void ProcessInputEvent(const SDL_Event& event);
 	void EndOfFrame();
 	int GetKeyState(std::string keyName);
+	float GetMouseState(std::string mouseInput);
 private:
-	Uint8 keyStates[SDL_SCANCODE_COUNT] = { 0 };
+	Uint8 keyStates[SDL_SCANCODE_COUNT];
+
+	float mouseX;
+	float mouseY;
+
+	float mouseWheelX;
+	float mouseWheelY;
+
+	Uint8 mouseButtonStates[5];
 };
