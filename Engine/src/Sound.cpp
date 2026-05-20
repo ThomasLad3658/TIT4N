@@ -27,7 +27,7 @@ void Sound::init(std::string filePath) {
 	int bytesPerSample = SDL_AUDIO_BYTESIZE(spec.format);
 	int bytesPerFrame = bytesPerSample * spec.channels;
 	int bytesPerSecond = spec.freq * bytesPerFrame;
-	duration = (float)length / (float)bytesPerSecond;
+	duration = (float)length / (float)bytesPerSecond * 1000.0f;
 }
 
 Sound::Sound(std::string filePath, SDL_AudioDeviceID dev)
@@ -61,12 +61,12 @@ bool Sound::isPlaying() const {
 }
 void Sound::play() {
 	if (!usable || !buffer || !stream) return;
-	play(0, (int)(duration * 1000.0f));
+	play(0, (int)(duration));
 }
 
 void Sound::play(int startMs) {
 	if (!usable || !buffer || !stream) return;
-	play(startMs, (int)(duration * 1000.0f));
+	play(startMs, (int)(duration));
 }
 
 void Sound::play(int startMs, int endMs) {
@@ -82,25 +82,44 @@ void Sound::play(int startMs, int endMs) {
 	Uint32 byteStart = (Uint32)((startMs / 1000.0f) * bytesPerSecond);
 	Uint32 byteEnd = (Uint32)((endMs / 1000.0f) * bytesPerSecond);
 
+	byteStart = (byteStart / bytesPerFrame) * bytesPerFrame;
+	byteEnd = (byteEnd / bytesPerFrame) * bytesPerFrame;
+
 	byteStart = SDL_min(byteStart, length);
 	byteEnd = SDL_min(byteEnd, length);
 
-	if (byteStart >= byteEnd) return;
+	// SDL_Log("play() called: startMs=%d endMs=%d byteStart=%u byteEnd=%u length=%u", startMs, endMs, byteStart, byteEnd, length);
+
+	if (byteStart >= byteEnd) {
+		SDL_Log("play() aborted: byteStart >= byteEnd");
+		return;
+	}
 
 	stop();
-	SDL_PutAudioStreamData(stream, buffer + byteStart, (int)(byteEnd - byteStart));
-	SDL_ResumeAudioStreamDevice(stream);
+
+	if (!SDL_PutAudioStreamData(stream, buffer + byteStart, (int)(byteEnd - byteStart))) {
+		SDL_Log("PutAudioStreamData failed: %s", SDL_GetError());
+		return;
+	}
+	if (!SDL_ResumeAudioStreamDevice(stream)) {
+		SDL_Log("ResumeAudioStreamDevice failed: %s", SDL_GetError());
+		return;
+	}
+
+	// SDL_Log("play() success, queued=%d", SDL_GetAudioStreamQueued(stream));
 	playing = true;
 	paused = false;
-	startTick = SDL_GetTicks() - startMs;
+	startTick = SDL_GetTicks();
 	endTick = 0;
 }
 
 void Sound::update() {
 	if (playing && !paused) {
-		// Check if stream is done
-		if (SDL_GetAudioStreamAvailable(stream) == 0) {
-			if (loop == true) play(loopStartMs, loopEndMs);
+		Uint64 elapsed = SDL_GetTicks() - startTick;
+		int queued = SDL_GetAudioStreamQueued(stream);
+		// SDL_Log("update: elapsed=%llu queued=%d", elapsed, queued);
+		if (elapsed > 100 && queued == 0) {
+			if (loop) play(loopStartMs, loopEndMs);
 			else stop();
 		}
 	}

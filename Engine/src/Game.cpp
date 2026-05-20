@@ -59,6 +59,8 @@ void Game::Run() {
 	Uint64 frameTime;
 
 	luaManager->RegisterFunction(this, &Game::CreateWindow, "CreateWindow");
+	luaManager->RegisterFunction(this, &Game::SetWindowFullscreen, "SetWindowFullscreen");
+	luaManager->RegisterFunction(this, &Game::SetWindowBorderless, "SetWindowBorderless");
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
@@ -146,6 +148,16 @@ void Game::CreateWindow(const char* title, int width, int height) {
 		throw std::runtime_error("Window creation failed");
 	}
 	renderSystem->Init(window);
+}
+
+bool Game::SetWindowFullscreen(bool fullscreenValue) {
+	fullscreen = SDL_SetWindowFullscreen(window, fullscreenValue);
+	return fullscreen;
+}
+
+bool Game::SetWindowBorderless(bool borderlessValue) {
+	borderless = !SDL_SetWindowBordered(window, !borderlessValue);
+	return borderless;
 }
 
 bool Game::SetWindowTitle(const char* title) {
