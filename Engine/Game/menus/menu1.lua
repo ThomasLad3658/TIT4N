@@ -1,7 +1,10 @@
 menu1 = {
 	entities = {
 		entity1 = {
-			tag = "button"
+			tag = "button",
+			OnClick = function()
+				LoadScene("levels/level1")
+			end
 		}
 	}
 }

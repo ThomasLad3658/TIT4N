@@ -5,7 +5,6 @@
 #include "SceneManager.hpp"
 #include "RenderSystem.hpp"
 #include "PhysicsSystem.hpp"
-#include "LuaManager.hpp"
 #include "InputManager.hpp"
 #include "Entity.hpp"
 #include "Common.hpp"
@@ -63,7 +62,11 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
-	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::LoadScene, "LoadScene");
+	luaManager->RegisterFunction(this, &Game::GetEntityVariable<int>, "GetEntityInt");
+	luaManager->RegisterFunction(this, &Game::GetEntityVariable<float>, "GetEntityFloat");
+	luaManager->RegisterFunction(this, &Game::GetEntityVariable<bool>, "GetEntityBool");
+	luaManager->RegisterFunction(this, &Game::GetEntityVariable<std::string>, "GetEntityString");
+	luaManager->RegisterFunction(sceneManager.get(), &SceneManager::QueueScene, "LoadScene");
 	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetKeyState, "GetKeyState");
 	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetMouseState, "GetMouseState");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::createSound, "CreateSound");
@@ -75,7 +78,6 @@ void Game::Run() {
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::resume, "ResumeSound");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::pause, "PauseSound");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::loop, "LoopSound");
-
 
 	luaManager->DoFile((getBasePath() + "Game/main.lua").c_str());
 	if (!window) {
@@ -108,6 +110,8 @@ void Game::Run() {
 		physicsSystem->Update();
 
 		renderSystem->render();
+
+		sceneManager->Update();
 
 		inputManager->EndOfFrame();
 
@@ -191,7 +195,7 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 	);
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::PlayAnimation, objPath.c_str(), "Play");
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::destroy, objPath.c_str(), "Suicide");
-	return std::move(entity);
+	return entity;
 
 }
 

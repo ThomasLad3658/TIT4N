@@ -22,6 +22,7 @@ player = {
     hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
 
 -- Custom properties (optional properties) do what you want here
+    hp = 100,
     maxSpeed = 8,
     speed = 20,
     friction = 30,
@@ -75,9 +76,8 @@ function player:OnUpdate(dt)
     if KeyA == 0 and KeyB == 0 then
         if self.dx > 0 then
             self.dx = math.max(0, self.dx - self.friction * dt)
-        else if self.dx < 0 then
-                self.dx = math.min(0, self.dx + self.friction * dt)
-            end
+        elseif self.dx < 0 then
+            self.dx = math.min(0, self.dx + self.friction * dt)
         end
     end
 
@@ -87,8 +87,6 @@ function player:OnUpdate(dt)
 
     self.x = self.x + self.dx
     self.y = self.y + self.dy
-
-    print(self.dx)
     
     self.isGrounded = false
 
@@ -98,9 +96,8 @@ function player:OnUpdate(dt)
     end
     if self.dx < 0 then
         self.mirroredH = true
-    else if self.dx > 0 then
-            self.mirroredH = false
-        end
+    elseif self.dx > 0 then
+        self.mirroredH = false
     end
     if newAction ~= self.action then
         self.action = newAction
@@ -108,40 +105,51 @@ function player:OnUpdate(dt)
     end
 end
 
-function player:OnCollision(tag, overlapX, overlapY, overlapW, overlapH)
+function player:fullCollision(overlapX, overlapY, overlapW, overlapH)
+    if overlapW < overlapH then
+        if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
+            self.x = self.x - overlapW
+            self.dx = math.min(self.dx, 0)
+        else
+            self.x = self.x + overlapW
+            self.dx = math.max(self.dx, 0)
+        end
+    else
+        if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
+            self.y = self.y - overlapH
+            self.isGrounded = true
+            self.dy = math.min(self.dy, 0)
+        else
+            self.y = self.y + overlapH
+            self.dy = math.max(self.dy, 0)
+        end
+    end
+end
+
+function player:partialCollision(overlapX, overlapY, overlapW, overlapH)
+    if overlapW < overlapH then
+        if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
+            self.x = self.x - overlapW/2
+        else
+            self.x = self.x + overlapW/2
+        end
+    else
+        if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
+            self.y = self.y - overlapH/2
+        else
+            self.y = self.y + overlapH/2
+        end
+    end
+end
+
+function player:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
     if tag == "wall" then
-        if overlapW < overlapH then
-            if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
-                self.x = self.x - overlapW
-                self.dx = math.min(self.dx, 0)
-            else
-                self.x = self.x + overlapW
-                self.dx = math.max(self.dx, 0)
-            end
-        else
-            if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
-                self.y = self.y - overlapH
-                self.isGrounded = true
-                self.dy = math.min(self.dy, 0)
-            else
-                self.y = self.y + overlapH
-                self.dy = math.max(self.dy, 0)
-            end
-        end
+        self:fullCollision(overlapX, overlapY, overlapW, overlapH)
     elseif tag == "player" then
-        if overlapW < overlapH then
-            if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
-                self.x = self.x - overlapW/2
-            else
-                self.x = self.x + overlapW/2
-            end
-        else
-            if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
-                self.y = self.y - overlapH/2
-            else
-                self.y = self.y + overlapH/2
-            end
-        end
+        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
+    elseif tag == "orc" then
+        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
+        self.hp = self.hp - 10
     end
 end
 

@@ -58,13 +58,14 @@ function button:OnUpdate(dt)
        mouseOver = true
     end
 
-    if (mouseLeft == 2 or mouseLeft == 1) and mouseOver then
+    if (mouseLeft == 2 or mouseLeft == 1) and mouseOver and self.visible then
         self.wasClicked = true
         newAction = "clicked"
     end
 
     if mouseLeft == 0 and mouseOver and self.wasClicked then
-        self.OnClick()
+        self:OnClick()
+        self.wasClicked = false
     end
 
     if newAction ~= self.action then
@@ -73,12 +74,12 @@ function button:OnUpdate(dt)
     end
 end
 
-function button:OnCollision(tag, overlapX, overlapY, overlapW, overlapH)
+function button:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
     -- Empty
 end
 
 function button:OnClick()
-    LoadScene("levels/level1")
+    -- Empty
 end
 
 function button:OnDestroy()

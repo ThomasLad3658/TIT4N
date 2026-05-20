@@ -48,6 +48,9 @@ template<>
 int lua_get<int>(lua_State* L, int index);
 
 template<>
+unsigned int lua_get<unsigned int>(lua_State* L, int index);
+
+template<>
 double lua_get<double>(lua_State* L, int index);
 
 template<>
@@ -67,6 +70,9 @@ void lua_push(lua_State* L, T value);
 
 template <>
 void lua_push<int>(lua_State* L, int value);
+
+template <>
+void lua_push<unsigned int>(lua_State* L, unsigned int value);
 
 template <>
 void lua_push<float>(lua_State* L, float value);
@@ -178,7 +184,10 @@ T LuaManager::callFunction(const char* name, bool requiresSelf, Args... args) {
 
 template <typename T>
 T LuaManager::GetVariable(const char* name) {
-	GetFields(name);
+	if (!GetFields(name)) {
+		std::cerr << "Couldn't find path for variable : " << name << std::endl;
+		throw std::runtime_error("Couldn't find path for variable");
+	}
 	T answer = lua_get<T>(L, -1);
 	lua_pop(L, 1);
 	return answer;

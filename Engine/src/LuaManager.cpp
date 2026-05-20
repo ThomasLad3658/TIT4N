@@ -13,6 +13,11 @@ int lua_get<int>(lua_State* L, int index) {
 }
 
 template<>
+unsigned int lua_get<unsigned int>(lua_State* L, int index) {
+	return static_cast<unsigned int>(lua_tointeger(L, index));
+}
+
+template<>
 double lua_get<double>(lua_State* L, int index) {
 	return lua_tonumber(L, index);
 }
@@ -44,6 +49,11 @@ void lua_push(lua_State* L, T value) {
 
 template <>
 void lua_push<int>(lua_State* L, int value) {
+	lua_pushinteger(L, value);
+}
+
+template <>
+void lua_push<unsigned int>(lua_State* L, unsigned int value) {
 	lua_pushinteger(L, value);
 }
 

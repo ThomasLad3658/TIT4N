@@ -36,8 +36,8 @@ void PhysicsSystem::Update() {
 	CheckCollisions();
 	for (const auto& collision : collisions) {
 		if (collision.isColliding) {
-			collision.entity1->Collisions(collision.entity2->getTag(), collision.overlapRect);
-			collision.entity2->Collisions(collision.entity1->getTag(), collision.overlapRect);
+			collision.entity1->Collisions(collision.entity2->getTag(), collision.entity2->getId(), collision.overlapRect);
+			collision.entity2->Collisions(collision.entity1->getTag(), collision.entity1->getId(), collision.overlapRect);
 		}
 	}
 }

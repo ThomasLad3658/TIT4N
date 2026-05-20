@@ -1,4 +1,5 @@
 #pragma once
+#include "LuaManager.hpp"
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <iostream>
@@ -30,6 +31,8 @@ public:
 	bool registerEntity(std::unique_ptr<Entity> entity);
 	bool isEntityRegistered(Entity* entity);
 	bool unregisterEntity(Entity* entity);
+	template<typename T>
+	T GetEntityVariable(unsigned int id, std::string variablePath);
 
 private:
 	bool running = false;
@@ -47,3 +50,14 @@ private:
 	Uint64 frameRate;
 	Uint64 frameDelay;
 };
+
+template <typename T>
+T Game::GetEntityVariable(unsigned int id, std::string variablePath) {
+	for (const auto& entity : entities) {
+		if (entity->getId() == id) {
+			return luaManager->GetVariable<T>(("/" + std::to_string(entity->getReferenceIndex()) + "." + variablePath).c_str());
+		}
+	}
+	std::cerr << "Couldn't find entity with id : " << id << std::endl;
+	throw std::runtime_error("Couldn't find entity with id");
+}

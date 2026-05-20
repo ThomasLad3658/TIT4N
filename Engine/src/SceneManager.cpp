@@ -6,7 +6,18 @@
 #include "Common.hpp"
 
 SceneManager::SceneManager(std::vector<std::unique_ptr<Entity>>* entities) : entities(entities) {
-	//
+	queuedScene = "";
+}
+
+void SceneManager::Update() {
+	if (queuedScene != "") {
+		LoadScene(queuedScene);
+		queuedScene = "";
+	}
+}
+
+void SceneManager::QueueScene(std::string name) {
+	queuedScene = name;
 }
 
 void SceneManager::LoadScene(std::string name) {

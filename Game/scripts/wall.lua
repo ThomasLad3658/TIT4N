@@ -42,7 +42,7 @@ function wall:OnUpdate(dt)
     -- Empty
 end
 
-function wall:OnCollision(tag, overlapX, overlapY, overlapW, overlapH)
+function wall:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
     -- Empty
 end
 

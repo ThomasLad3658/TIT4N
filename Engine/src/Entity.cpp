@@ -122,7 +122,7 @@ void Entity::Update(float dt)
 	}
 }
 
-void Entity::PlayAnimation(std::string animationName, bool direction) {
+void Entity::PlayAnimation(std::string animationName) {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 	std::string animationPath = "/" + std::to_string(referenceIndex) + ".animations." + animationName;
 	animationRow = luaManager->GetVariable<int>((animationPath + ".row").c_str());
@@ -131,10 +131,11 @@ void Entity::PlayAnimation(std::string animationName, bool direction) {
 	animationLoop = luaManager->GetVariable<bool>((animationPath + ".loop").c_str());
 	animationCurrentFrame = 0;
 	animationTimer = 0;
+
 }
 
-void Entity::Collisions(std::string tag, SDL_FRect overlap) {
-	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnCollision").c_str(), true, tag, overlap.x, overlap.y, overlap.w, overlap.h);
+void Entity::Collisions(std::string tag, unsigned int id, SDL_FRect overlap) {
+	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnCollision").c_str(), true, tag, id, overlap.x, overlap.y, overlap.w, overlap.h);
 }
 
 void Entity::setRenderLayer(unsigned char z) {
@@ -155,6 +156,10 @@ unsigned char Entity::getRenderLayer() const {
 
 unsigned int Entity::getId() const {
 	return id;
+}
+
+unsigned int Entity::getReferenceIndex() const {
+	return referenceIndex;
 }
 
 SDL_FRect Entity::getHitbox() const {
