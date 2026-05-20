@@ -43,6 +43,7 @@ private:
 	std::unique_ptr<PhysicsSystem> physicsSystem;
 	std::unique_ptr<LuaManager> luaManager;
 	std::vector<std::unique_ptr<Entity>> entities;
+	std::vector<Entity*> deletionQueue;
 	std::unique_ptr<InputManager> inputManager;
 	std::string windowTitle;
 	int windowWidth;

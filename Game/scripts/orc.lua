@@ -1,15 +1,14 @@
-player = {
+orc = {
 -- Generic properties ( all required)
     -- Graphic infos
-    path     = "Game/assets/sprites/player/Soldier.png",
+    path     = "Game/assets/sprites/orc/Orc.png",
     action = "Idle",
     mirroredH = false, mirroredV = false,
     visible  = true,
     animations = {
         Idle = { row = 0, frameCount = 6, fps = 9, loop = true  },
         Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
-        Attack = { row = 2, frameCount = 6, fps = 12, loop = false },
-        dead = { row = 6, frameCount = 4, fps = 4, loop = false }
+        Attack = { row = 2, frameCount = 6, fps = 12, loop = false }
     },
 
     -- Position infos
@@ -23,20 +22,18 @@ player = {
     hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
 
 -- Custom properties (optional properties) do what you want here
-    hp = 100,
     maxSpeed = 8,
     speed = 20,
     friction = 30,
     jumpStrength = 500,
-    isGrounded = false,
-    timeBeforeSuicide = 1000
+    isGrounded = false
 }
 
-player.__index = player
+orc.__index = orc
 
-function player:new(overrides)
+function orc:new(overrides)
 	local instance = {}
-    setmetatable(instance, player)
+    setmetatable(instance, orc)
     if overrides then
         for key, value in pairs(overrides) do
             instance[key] = value
@@ -53,28 +50,14 @@ function player:new(overrides)
     return instance
 end
 
-function player:OnInit()
+function orc:OnInit()
 	self.Play(self.action)
 end
 
-function player:OnUpdate(dt)
-    local newAction
+function orc:OnUpdate(dt)
+    local newAction = "Idle"
 
     -- Movements
-    local KeyA = GetKeyState("A")
-    local KeyB = GetKeyState("D")
-    local KeySpace = GetKeyState("Space")
-
-    if KeyA == 2 or KeyA == 1 then
-        self.dx = self.dx - self.speed * dt
-    end
-    if KeyB == 2 or KeyB == 1 then
-        self.dx = self.dx + self.speed * dt
-    end
-    if KeySpace == 2 and self.isGrounded then
-        self.dy = self.dy - self.jumpStrength * dt
-    end
-
     if KeyA == 0 and KeyB == 0 then
         if self.dx > 0 then
             self.dx = math.max(0, self.dx - self.friction * dt)
@@ -85,11 +68,6 @@ function player:OnUpdate(dt)
 
     self.dx = math.max(-self.maxSpeed, math.min(self.dx, self.maxSpeed))
 
-    if self.hp <= 0 then
-        self.dx = 0
-        self.dy = 0
-    else
-
     self.dy = self.dy + 30 * dt
 
     self.x = self.x + self.dx
@@ -97,24 +75,9 @@ function player:OnUpdate(dt)
     
     self.isGrounded = false
 
-    -- Check life
-    if self.hp <= 0 then
-        if self.timeBeforeSuicide <= 0 then
-            self.Suicide()
-        end
-        else
-            self.timeBeforeSuicide = self.timeBeforeSuicide - dt
-        end
-    end
-
     -- Animations
     if self.dx ~= 0 then
         newAction = "Walk"
-    else
-        newAction = "Idle"
-    end
-    if self.hp <= 0 then
-        newAction = "dead"
     end
     if self.dx < 0 then
         self.mirroredH = true
@@ -127,7 +90,7 @@ function player:OnUpdate(dt)
     end
 end
 
-function player:fullCollision(overlapX, overlapY, overlapW, overlapH)
+function orc:fullCollision(overlapX, overlapY, overlapW, overlapH)
     if overlapW < overlapH then
         if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
             self.x = self.x - overlapW
@@ -148,7 +111,7 @@ function player:fullCollision(overlapX, overlapY, overlapW, overlapH)
     end
 end
 
-function player:partialCollision(overlapX, overlapY, overlapW, overlapH)
+function orc:partialCollision(overlapX, overlapY, overlapW, overlapH)
     if overlapW < overlapH then
         if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
             self.x = self.x - overlapW/2
@@ -164,43 +127,14 @@ function player:partialCollision(overlapX, overlapY, overlapW, overlapH)
     end
 end
 
-function player:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
+function orc:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
     if tag == "wall" then
         self:fullCollision(overlapX, overlapY, overlapW, overlapH)
-    elseif tag == "player" then
-        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     elseif tag == "orc" then
-        self:fullCollision(overlapX, overlapY, overlapW, overlapH)
-        if GetEntityBool(entityId, "visible") then
-            self.hp = self.hp - 5
-            print("Player hit by orc! HP: " .. self.hp)
-        end
+        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     end
 end
 
-function player:OnDestroy()
+function orc:OnDestroy()
 	--Empty
 end
-
---[[
-    -- Required -> they will cause a crash if not specified
-    path
-    x, y
-    srcrect
-    dstScale
-    hitbox
-    angle       -> Can cause unexpected behaviour if not specified
-    z           -> Can cause unexpected behaviour if not specified
-    new()       -> Never modify, never remove
-    All 4 other functions ( OnInit, OnUpdate, OnCollision, OnDestroy ) -> Crash if not specified, can be empty
-
-    -- Optional -> they might cause unexpected behaviour (nil) if not specified or crash in some cases, but they are not required
-    mirroredH   -> if not specified, they are set to false by default
-    mirroredV   -> if not specified, they are set to false by default
-    visible     -> if not specified, it is set to false by default (invisible)
-    animations  -> Crash if Play is called without this table
-    action      -> to help you manage your animations, not used by the engine, but useful for your scripts
-    dx, dy      -> to help you manage your movements, not used by the engine, but useful for your scripts
-
-    More functions and properties can be added as you want, they will be ignored by the engine if not used, but they can be useful for your scripts
-]]

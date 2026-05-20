@@ -103,6 +103,8 @@ void Game::Run() {
 
 		float dtSeconds = dt / 1000000000.0f;
 
+		// Call all OnUpdate functions in Lua
+		luaManager->callFunction<void>("OnUpdate", false, dtSeconds);
 		for (auto& entity : entities) {
 			entity->Update(dtSeconds);
 		}
@@ -113,6 +115,10 @@ void Game::Run() {
 
 		sceneManager->Update();
 
+		for (auto& entity : deletionQueue) {
+			unregisterEntity(entity);
+		}
+		
 		inputManager->EndOfFrame();
 
 		frameTime = SDL_GetTicksNS() - frameStart;
@@ -201,7 +207,8 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 
 bool Game::DeleteEntity(Entity* entity) {
 	if (!isEntityRegistered(entity)) return false;
-	return unregisterEntity(entity);
+	deletionQueue.push_back(entity);
+	return true;
 }
 
 bool Game::registerEntity(std::unique_ptr<Entity> entity) {

@@ -17,18 +17,18 @@ level1 = {
 		},
 		entity4 = {
 			tag = "wall",
-			x = 640,
-			y = 300
+			x = -310,
+			y = -20
 		},
 		entity5 = {
 			tag = "wall",
-			x = 960,
-			y = 300
+			x = 630,
+			y = -20
 		},
 		entity6 = {
-			tag = "wall",
-			x = 1280,
-			y = 300
+			tag = "orc",
+			x = 100,
+			y = -100
 		}
 	}
 }

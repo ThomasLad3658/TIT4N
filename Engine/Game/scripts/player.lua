@@ -8,7 +8,8 @@ player = {
     animations = {
         Idle = { row = 0, frameCount = 6, fps = 9, loop = true  },
         Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
-        Attack = { row = 2, frameCount = 6, fps = 12, loop = false }
+        Attack = { row = 2, frameCount = 6, fps = 12, loop = false },
+        dead = { row = 6, frameCount = 4, fps = 4, loop = false }
     },
 
     -- Position infos
@@ -27,7 +28,8 @@ player = {
     speed = 20,
     friction = 30,
     jumpStrength = 500,
-    isGrounded = false
+    isGrounded = false,
+    timeBeforeSuicide = 1000
 }
 
 player.__index = player
@@ -56,7 +58,7 @@ function player:OnInit()
 end
 
 function player:OnUpdate(dt)
-    local newAction = "Idle"
+    local newAction
 
     -- Movements
     local KeyA = GetKeyState("A")
@@ -83,6 +85,11 @@ function player:OnUpdate(dt)
 
     self.dx = math.max(-self.maxSpeed, math.min(self.dx, self.maxSpeed))
 
+    if self.hp <= 0 then
+        self.dx = 0
+        self.dy = 0
+    else
+
     self.dy = self.dy + 30 * dt
 
     self.x = self.x + self.dx
@@ -90,9 +97,24 @@ function player:OnUpdate(dt)
     
     self.isGrounded = false
 
+    -- Check life
+    if self.hp <= 0 then
+        if self.timeBeforeSuicide <= 0 then
+            self.Suicide()
+        end
+        else
+            self.timeBeforeSuicide = self.timeBeforeSuicide - dt
+        end
+    end
+
     -- Animations
     if self.dx ~= 0 then
         newAction = "Walk"
+    else
+        newAction = "Idle"
+    end
+    if self.hp <= 0 then
+        newAction = "dead"
     end
     if self.dx < 0 then
         self.mirroredH = true
@@ -148,8 +170,11 @@ function player:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlap
     elseif tag == "player" then
         self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     elseif tag == "orc" then
-        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
-        self.hp = self.hp - 10
+        self:fullCollision(overlapX, overlapY, overlapW, overlapH)
+        if GetEntityBool(entityId, "visible") then
+            self.hp = self.hp - 5
+            print("Player hit by orc! HP: " .. self.hp)
+        end
     end
 end
 
@@ -173,7 +198,7 @@ end
     mirroredH   -> if not specified, they are set to false by default
     mirroredV   -> if not specified, they are set to false by default
     visible     -> if not specified, it is set to false by default (invisible)
-    animations  -> Crash if PlayAnimation is called without this table
+    animations  -> Crash if Play is called without this table
     action      -> to help you manage your animations, not used by the engine, but useful for your scripts
     dx, dy      -> to help you manage your movements, not used by the engine, but useful for your scripts
 

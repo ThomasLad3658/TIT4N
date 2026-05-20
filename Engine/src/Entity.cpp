@@ -38,7 +38,7 @@ void Entity::Init(SDL_Renderer* sdlRenderer) {
 }
 
 void Entity::destroy() {
-	ServiceLocator::getGame()->unregisterEntity(this);
+	ServiceLocator::getGame()->DeleteEntity(this);
 }
 
 bool Entity::isInitialized() const {
