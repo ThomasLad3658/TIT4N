@@ -1,27 +1,35 @@
 player = {
-	-- Generic properties
+-- Generic properties ( all required)
+    -- Graphic infos
     path     = "Game/assets/sprites/player/Soldier.png",
-    x = 0, y = 0, z = 0,
-    angle = 0,
-    mirroredH = false, mirroredV = false,
-    srcrect  = { x = 0, y = 0, w = 100, h = 100 },
-    dstScale = 5,
-    visible  = true,
-    rotation = 0,
-    tags	 = { "player", "character" },
-    hitboxs  = { { ox = 0, oy = 0, w = 100, h = 100 } },
-    paused = false,
     action = "Idle",
+    mirroredH = false, mirroredV = false,
+    visible  = true,
     animations = {
         Idle = { row = 0, frameCount = 6, fps = 9, loop = true  },
         Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
         Attack = { row = 2, frameCount = 6, fps = 12, loop = false },
+        dead = { row = 6, frameCount = 4, fps = 4, loop = false }
     },
 
-    -- Custom properties
-    hp    = 100,
-    speed = 100,
-    soundPlaying = false
+    -- Position infos
+    x = 0, y = 0, z = 0,
+    dx = 0, dy = 0,
+    angle = 0,
+    srcrect  = { x = 0, y = 0, w = 100, h = 100 },
+    dstScale = 5,
+
+    -- Behavior infos
+    hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
+
+-- Custom properties (optional properties) do what you want here
+    hp = 100,
+    maxSpeed = 8,
+    speed = 20,
+    friction = 30,
+    jumpStrength = 500,
+    isGrounded = false,
+    timeBeforeSuicide = 1000
 }
 
 player.__index = player
@@ -34,6 +42,14 @@ function player:new(overrides)
             instance[key] = value
         end
     end
+    assert(instance.path ~= nil, "path is required")
+    assert(instance.srcrect ~= nil, "srcrect is required")
+    assert(instance.dstScale ~= nil, "dstScale is required")
+    assert(instance.x ~= nil, "x is required")
+    assert(instance.y ~= nil, "y is required")
+    assert(instance.hitbox ~= nil, "hitbox is required")
+    assert(instance.angle ~= nil, "angle is required")
+    assert(instance.z ~= nil, "z is required")
     return instance
 end
 
@@ -42,48 +58,68 @@ function player:OnInit()
 end
 
 function player:OnUpdate(dt)
-    local newAction = "Idle"
-	local dx = 0
-    local dy = 0
+    local newAction
 
     -- Movements
-    if GetKeyState("W") == 2 or GetKeyState("W") == 1 then
-        dy = dy - self.speed * dt
-        newAction = "Walk"
-    end
-    if GetKeyState("S") == 2 or GetKeyState("S") == 1 then
-        dy = dy + self.speed * dt
-        newAction = "Walk"
-    end
-    if GetKeyState("A") == 2 or GetKeyState("A") == 1 then
-        dx = dx - self.speed * dt
-        newAction = "Walk"
-    end
-    if GetKeyState("D") == 2 or GetKeyState("D") == 1 then
-        dx = dx + self.speed * dt
-        newAction = "Walk"
-    end
-    if GetKeyState("C") == 2 then
-        sound = CreateSound("C:\\Users\\levra\\source\\repos\\ThomasLad3658\\TIT4N\\Game\\assets\\sounds\\example_loop.wav")
-        PlaySound(sound)
-        soundPlaying = true
-        IsSoundPlaying(sound)
-    end
-    if soundPlaying then
-        print(IsSoundPlaying(sound))
-    end
-    
-    self.x = self.x + dx
-    self.y = self.y + dy
+    local KeyA = GetKeyState("A")
+    local KeyB = GetKeyState("D")
+    local KeySpace = GetKeyState("Space")
 
-    -- Collisions
+    if KeyA == 2 or KeyA == 1 then
+        self.dx = self.dx - self.speed * dt
+    end
+    if KeyB == 2 or KeyB == 1 then
+        self.dx = self.dx + self.speed * dt
+    end
+    if KeySpace == 2 and self.isGrounded then
+        self.dy = self.dy - self.jumpStrength * dt
+    end
+
+    if KeyA == 0 and KeyB == 0 then
+        if self.dx > 0 then
+            self.dx = math.max(0, self.dx - self.friction * dt)
+        elseif self.dx < 0 then
+            self.dx = math.min(0, self.dx + self.friction * dt)
+        end
+    end
+
+    self.dx = math.max(-self.maxSpeed, math.min(self.dx, self.maxSpeed))
+
+    if self.hp <= 0 then
+        self.dx = 0
+        self.dy = 0
+    else
+
+    self.dy = self.dy + 30 * dt
+
+    self.x = self.x + self.dx
+    self.y = self.y + self.dy
+    
+    self.isGrounded = false
+
+    -- Check life
+    if self.hp <= 0 then
+        if self.timeBeforeSuicide <= 0 then
+            self.Suicide()
+        end
+        else
+            self.timeBeforeSuicide = self.timeBeforeSuicide - dt
+        end
+    end
 
     -- Animations
-    if dx < 0 then
+    if self.dx ~= 0 then
+        newAction = "Walk"
+    else
+        newAction = "Idle"
+    end
+    if self.hp <= 0 then
+        newAction = "dead"
+    end
+    if self.dx < 0 then
         self.mirroredH = true
-    else if dx > 0 then
-            self.mirroredH = false
-        end
+    elseif self.dx > 0 then
+        self.mirroredH = false
     end
     if newAction ~= self.action then
         self.action = newAction
@@ -91,6 +127,80 @@ function player:OnUpdate(dt)
     end
 end
 
+function player:fullCollision(overlapX, overlapY, overlapW, overlapH)
+    if overlapW < overlapH then
+        if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
+            self.x = self.x - overlapW
+            self.dx = math.min(self.dx, 0)
+        else
+            self.x = self.x + overlapW
+            self.dx = math.max(self.dx, 0)
+        end
+    else
+        if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
+            self.y = self.y - overlapH
+            self.isGrounded = true
+            self.dy = math.min(self.dy, 0)
+        else
+            self.y = self.y + overlapH
+            self.dy = math.max(self.dy, 0)
+        end
+    end
+end
+
+function player:partialCollision(overlapX, overlapY, overlapW, overlapH)
+    if overlapW < overlapH then
+        if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
+            self.x = self.x - overlapW/2
+        else
+            self.x = self.x + overlapW/2
+        end
+    else
+        if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
+            self.y = self.y - overlapH/2
+        else
+            self.y = self.y + overlapH/2
+        end
+    end
+end
+
+function player:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
+    if tag == "wall" then
+        self:fullCollision(overlapX, overlapY, overlapW, overlapH)
+    elseif tag == "player" then
+        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
+    elseif tag == "orc" then
+        self:fullCollision(overlapX, overlapY, overlapW, overlapH)
+        if GetEntityBool(entityId, "visible") then
+            self.hp = self.hp - 5
+            print("Player hit by orc! HP: " .. self.hp)
+        end
+    end
+end
+
 function player:OnDestroy()
 	--Empty
 end
+
+--[[
+    -- Required -> they will cause a crash if not specified
+    path
+    x, y
+    srcrect
+    dstScale
+    hitbox
+    angle       -> Can cause unexpected behaviour if not specified
+    z           -> Can cause unexpected behaviour if not specified
+    new()       -> Never modify, never remove
+    All 4 other functions ( OnInit, OnUpdate, OnCollision, OnDestroy ) -> Crash if not specified, can be empty
+
+    -- Optional -> they might cause unexpected behaviour (nil) if not specified or crash in some cases, but they are not required
+    mirroredH   -> if not specified, they are set to false by default
+    mirroredV   -> if not specified, they are set to false by default
+    visible     -> if not specified, it is set to false by default (invisible)
+    animations  -> Crash if Play is called without this table
+    action      -> to help you manage your animations, not used by the engine, but useful for your scripts
+    dx, dy      -> to help you manage your movements, not used by the engine, but useful for your scripts
+
+    More functions and properties can be added as you want, they will be ignored by the engine if not used, but they can be useful for your scripts
+]]

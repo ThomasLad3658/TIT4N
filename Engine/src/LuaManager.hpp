@@ -48,6 +48,9 @@ template<>
 int lua_get<int>(lua_State* L, int index);
 
 template<>
+unsigned int lua_get<unsigned int>(lua_State* L, int index);
+
+template<>
 double lua_get<double>(lua_State* L, int index);
 
 template<>
@@ -69,6 +72,9 @@ template <>
 void lua_push<int>(lua_State* L, int value);
 
 template <>
+void lua_push<unsigned int>(lua_State* L, unsigned int value);
+
+template <>
 void lua_push<float>(lua_State* L, float value);
 
 template <>
@@ -79,6 +85,9 @@ void lua_push<bool>(lua_State* L, bool value);
 
 template <>
 void lua_push<const char*>(lua_State* L, const char* value);
+
+template <>
+void lua_push<std::string>(lua_State* L, std::string value);
 
 template <typename R, typename O, typename... Args, size_t... I>
 void LuaManager::RegisterHelper(O* obj, R(O:: * func)(Args...), std::index_sequence<I...>, const char* name) {
@@ -165,6 +174,7 @@ T LuaManager::callFunction(const char* name, bool requiresSelf, Args... args) {
 	}
 	if constexpr (!std::is_void_v<T>) {
 		T value = lua_get<T>(L, -1);
+		lua_pop(L, 1);
 		return value;
 	}
 	else {
@@ -174,14 +184,19 @@ T LuaManager::callFunction(const char* name, bool requiresSelf, Args... args) {
 
 template <typename T>
 T LuaManager::GetVariable(const char* name) {
-	GetFields(name);
+	if (!GetFields(name)) {
+		std::cerr << "Couldn't find path for variable : " << name << std::endl;
+		throw std::runtime_error("Couldn't find path for variable");
+	}
 	T answer = lua_get<T>(L, -1);
+	lua_pop(L, 1);
 	return answer;
 }
 
 template<typename T>
 void LuaManager::SetVariable(std::string name, T value) {
-	GetFields(name.erase(name.size() - name.find_last_of('.')));
+	std::string field = name;
+	GetFields(field.erase(field.size() - field.find_last_of('.')));
 	lua_push<T>(L, value);
 	lua_setfield(L, -2, name.substr(name.find_last_of('.') + 1).c_str());
 	lua_pop(L, 1);

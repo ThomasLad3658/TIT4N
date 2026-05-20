@@ -8,7 +8,7 @@ class Entity {
 public:
 	Entity(
 		std::string tag, 
-		int refenceIndex,
+		int referenceIndex,
 		std::string filepath, 
 		const SDL_FRect& src, 
 		const SDL_FRect& dst
@@ -18,13 +18,15 @@ public:
 	void destroy();
 	bool present();
 	void Update(float dt);
-	void PlayAnimation(std::string animationName, bool direction);
+	void PlayAnimation(std::string animationName);
+	void Collisions(std::string tag, unsigned int id, SDL_FRect overlap);
 	bool isInitialized() const;
 	void setRenderLayer(unsigned char z);
-	SDL_FRect getDstRect() const;
+	SDL_FRect* getDstRect();
 	std::string getTag() const;
 	unsigned char getRenderLayer() const;
 	unsigned int getId() const;
+	unsigned int getReferenceIndex() const;
 	SDL_FRect getHitbox() const;
 
 protected:
@@ -43,6 +45,7 @@ protected:
 	bool animationLoop = true;
 	bool mirroredH = false;
 	bool mirroredV = false;
+	bool visible = true;
 	double angle = 0;
 	float animationTimer = 0;
 

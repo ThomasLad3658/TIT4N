@@ -1,4 +1,5 @@
 #include <SDL3_image/SDL_image.h>
+#include "Game.hpp"
 #include "Entity.hpp"
 #include "LuaManager.hpp"
 #include "ServiceLocator.hpp"
@@ -37,7 +38,7 @@ void Entity::Init(SDL_Renderer* sdlRenderer) {
 }
 
 void Entity::destroy() {
-	//
+	ServiceLocator::getGame()->DeleteEntity(this);
 }
 
 bool Entity::isInitialized() const {
@@ -46,7 +47,7 @@ bool Entity::isInitialized() const {
 
 bool Entity::present()
 {
-	if (initialized == false) return false;
+	if (initialized == false || visible == false) return false;
 	SDL_FlipMode flip = SDL_FLIP_NONE;
 	if (mirroredH && mirroredV) flip = SDL_FLIP_HORIZONTAL_AND_VERTICAL;
 	else if(mirroredH) flip = SDL_FLIP_HORIZONTAL;
@@ -62,7 +63,7 @@ bool Entity::present()
 void Entity::Update(float dt)
 {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
-
+	/*
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.x", srcrect.x);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.y", srcrect.y);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".srcrect.w", srcrect.w);
@@ -72,7 +73,7 @@ void Entity::Update(float dt)
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".y", dstrect.y);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".w", dstrect.w);
 	luaManager->SetVariable<float>("/" + std::to_string(referenceIndex) + ".h", dstrect.h);
-
+	*/
 	luaManager->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnUpdate").c_str(), true, dt);
 
 	float dstScale = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str());
@@ -97,6 +98,8 @@ void Entity::Update(float dt)
 	angle = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".angle").c_str());
 	mirroredH = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredH").c_str());
 	mirroredV = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredV").c_str());
+	renderLayer = luaManager->GetVariable<int>(("/" + std::to_string(referenceIndex) + ".z").c_str());
+	visible = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".visible").c_str());
 	
 	// Update animations
 	if (animationFrameCount > 0) {
@@ -119,7 +122,7 @@ void Entity::Update(float dt)
 	}
 }
 
-void Entity::PlayAnimation(std::string animationName, bool direction) {
+void Entity::PlayAnimation(std::string animationName) {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 	std::string animationPath = "/" + std::to_string(referenceIndex) + ".animations." + animationName;
 	animationRow = luaManager->GetVariable<int>((animationPath + ".row").c_str());
@@ -128,14 +131,19 @@ void Entity::PlayAnimation(std::string animationName, bool direction) {
 	animationLoop = luaManager->GetVariable<bool>((animationPath + ".loop").c_str());
 	animationCurrentFrame = 0;
 	animationTimer = 0;
+
+}
+
+void Entity::Collisions(std::string tag, unsigned int id, SDL_FRect overlap) {
+	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnCollision").c_str(), true, tag, id, overlap.x, overlap.y, overlap.w, overlap.h);
 }
 
 void Entity::setRenderLayer(unsigned char z) {
 	renderLayer = z;
 }
 
-SDL_FRect Entity::getDstRect() const {
-	return dstrect;
+SDL_FRect* Entity::getDstRect() {
+	return &dstrect;
 }
 
 std::string Entity::getTag() const {
@@ -148,6 +156,10 @@ unsigned char Entity::getRenderLayer() const {
 
 unsigned int Entity::getId() const {
 	return id;
+}
+
+unsigned int Entity::getReferenceIndex() const {
+	return referenceIndex;
 }
 
 SDL_FRect Entity::getHitbox() const {

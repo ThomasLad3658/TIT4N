@@ -6,25 +6,41 @@
 #include "Common.hpp"
 
 SceneManager::SceneManager(std::vector<std::unique_ptr<Entity>>* entities) : entities(entities) {
-	//
+	queuedScene = "";
 }
 
-void SceneManager::LoadLevel(std::string name) {
-	std::string levelPath = (getBasePath() + "Game/levels/" + name + ".lua");
-	std::cout << "Loading level : " << levelPath << std::endl;
+void SceneManager::Update() {
+	if (queuedScene != "") {
+		LoadScene(queuedScene);
+		queuedScene = "";
+	}
+}
 
-	// *Note* add something to clean everything before loading
+void SceneManager::QueueScene(std::string name) {
+	queuedScene = name;
+}
+
+void SceneManager::LoadScene(std::string name) {
+	std::string path = (getBasePath() + "Game/" + name + ".lua");
+	std::cout << "Loading : " << path << std::endl;
+
+	ClearScene();
 
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
-	luaManager->DoFile(levelPath.c_str());
-	int size = luaManager->GetFieldSize((name + ".entities"));
+	std::string tablePath = name.substr(name.find_last_of('/') + 1);
+	luaManager->DoFile(path.c_str());
+	int size = luaManager->GetFieldSize((tablePath + ".entities"));
 	for (int i = 1; i <= size; i++) {
 
-		std::string entityPath = (name + ".entities.entity" + std::to_string(i));
+		std::string entityPath = (tablePath + ".entities.entity" + std::to_string(i));
 
 		std::unique_ptr<Entity> entity = ServiceLocator::getGame()->CreateEntity(entityPath);
 		entity->Init(ServiceLocator::getRenderSystem()->getRenderer());
 		ServiceLocator::getGame()->registerEntity(std::move(entity));
 
 	}
+}
+
+void SceneManager::ClearScene() {
+	entities->clear();
 }
