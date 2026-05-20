@@ -20,7 +20,8 @@ player = {
 
     -- Custom properties
     hp    = 100,
-    speed = 100
+    speed = 100,
+    soundPlaying = false
 }
 
 player.__index = player
@@ -44,6 +45,7 @@ function player:OnUpdate(dt)
     local newAction = "Idle"
 	local dx = 0
     local dy = 0
+    local sound = -1
 
     -- Movements
     if GetKeyState("W") == 2 or GetKeyState("W") == 1 then
@@ -62,6 +64,16 @@ function player:OnUpdate(dt)
         dx = dx + self.speed * dt
         newAction = "Walk"
     end
+    if GetKeyState("C") == 2 then
+        sound = CreateSound("C:\\Users\\levra\\source\\repos\\ThomasLad3658\\TIT4N\\Game\\assets\\sounds\\example.wav")
+        PlaySound(sound)
+        soundPlaying = true
+    end
+    if soundPlaying then
+        soundPlaying = IsSoundPlaying(sound)
+        print(soundPlaying)
+    end
+    
     self.x = self.x + dx
     self.y = self.y + dy
 
