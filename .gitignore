@@ -364,3 +364,17 @@ FodyWeavers.xsd
 /Engine/Engine.vcxproj
 /Engine/Engine.vcxproj.filters
 /Engine/Engine.vcxproj.user
+/Engine/Game/assets/sounds/example.wav
+/Engine/Game/assets/sounds/example_loop.wav
+/Engine/Game/assets/backgrounds/test.png
+/Engine/Game/assets/sprites/button/button.png
+/Engine/Game/assets/sprites/orc/orc.png
+/Engine/Game/assets/sprites/player/Soldier.png
+/Engine/Game/assets/sprites/wall/wall.png
+/Engine/Game/levels/level1.lua
+/Engine/Game/menus/menu1.lua
+/Engine/Game/scripts/button.lua
+/Engine/Game/scripts/orc.lua
+/Engine/Game/scripts/player.lua
+/Engine/Game/scripts/wall.lua
+/Engine/Game/main.lua
