@@ -100,7 +100,7 @@ function player:OnUpdate(dt)
     -- Check life
     if self.hp <= 0 then
         if self.timeBeforeSuicide <= 0 then
-            --self.Suicide()
+            self.Suicide()
         else
             self.timeBeforeSuicide = self.timeBeforeSuicide - dt
         end

@@ -65,6 +65,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
 	luaManager->RegisterFunction(this, &Game::FindEntitybyName, "FindEntitybyName");
+	luaManager->RegisterFunction(this, &Game::IsEntityAlive, "IsEntityAlive");
 	luaManager->RegisterFunction(this, &Game::GetEntityVariable<int>, "GetEntityInt");
 	luaManager->RegisterFunction(this, &Game::GetEntityVariable<float>, "GetEntityFloat");
 	luaManager->RegisterFunction(this, &Game::GetEntityVariable<bool>, "GetEntityBool");
@@ -243,4 +244,13 @@ int Game::FindEntitybyName(std::string name) {
 		}
 	}
 	return -1;
+}
+
+bool Game::IsEntityAlive(int id) {
+	for (const auto& entity : entities) {
+		if (entity->getId() == id) {
+			return true;
+		}
+	}
+	return false;
 }

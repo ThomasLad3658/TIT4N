@@ -65,25 +65,25 @@ end
 function orc:OnUpdate(dt)
     local newAction = "Idle"
 
-    -- Tracking the player
-    local playerAction = GetEntityString(playerId, "action")
-    local playerX = GetEntityFloat(playerId, "x")
-    local playerY = GetEntityFloat(playerId, "y")
-
     -- Movements
-    
-    if playerAction ~= "dead" then
-        self.moving = true
-        if playerX < self.x then
-            self.dx = self.dx - self.speed * dt
-        elseif playerX > self.x then
-            self.dx = self.dx + self.speed * dt
+    if IsEntityAlive(playerId) then
+        local playerAction = GetEntityString(playerId, "action")
+        local playerX = GetEntityFloat(playerId, "x")
+        local playerY = GetEntityFloat(playerId, "y")
+
+        if playerAction ~= "dead" then
+            self.moving = true
+            if playerX < self.x then
+                self.dx = self.dx - self.speed * dt
+            elseif playerX > self.x then
+                self.dx = self.dx + self.speed * dt
+            end
+            if (playerY > self.y) and self.isGrounded then
+                self.dy = self.dy - self.jumpStrength
+            end
+        else
+            self.moving = false
         end
-        if (playerY > self.y) and self.isGrounded then
-            self.dy = self.dy - self.jumpStrength
-        end
-    else
-        self.moving = false
     end
     if self.moving == false then
         if self.dx > 0 then

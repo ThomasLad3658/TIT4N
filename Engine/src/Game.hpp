@@ -34,6 +34,7 @@ public:
 	bool isEntityRegistered(Entity* entity);
 	bool unregisterEntity(Entity* entity);
 	int FindEntitybyName(std::string name);
+	bool IsEntityAlive(int id);
 	template<typename T>
 	T GetEntityVariable(unsigned int id, std::string variablePath);
 
