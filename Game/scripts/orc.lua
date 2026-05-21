@@ -59,17 +59,17 @@ end
 
 function orc:OnInit()
 	self.Play(self.action)
-    playerId = FindEntitybyName("player1")
+    self.playerId = FindEntitybyName("player1")
 end
 
 function orc:OnUpdate(dt)
     local newAction = "Idle"
 
     -- Movements
-    if IsEntityAlive(playerId) then
-        local playerAction = GetEntityString(playerId, "action")
-        local playerX = GetEntityFloat(playerId, "x")
-        local playerY = GetEntityFloat(playerId, "y")
+    if IsEntityAlive(self.playerId) then
+        local playerAction = GetEntityString(self.playerId, "action")
+        local playerX = GetEntityFloat(self.playerId, "x")
+        local playerY = GetEntityFloat(self.playerId, "y")
 
         if playerAction ~= "dead" then
             self.moving = true
