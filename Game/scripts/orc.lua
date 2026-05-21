@@ -6,7 +6,7 @@ orc = {
     mirroredH = false, mirroredV = false,
     visible  = true,
     animations = {
-        Idle = { row = 0, frameCount = 6, fps = 9, loop = true  },
+        Idle = { row = 0, frameCount = 6, fps = 8, loop = true  },
         Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
         Attack = { row = 2, frameCount = 6, fps = 12, loop = false }
     },
@@ -22,11 +22,18 @@ orc = {
     hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
 
 -- Custom properties (optional properties) do what you want here
-    maxSpeed = 8,
-    speed = 20,
+    -- Physics properties
+    maxSpeed = 3,
+    speed = 3,
     friction = 30,
-    jumpStrength = 500,
-    isGrounded = false
+    jumpStrength = 8,
+    isGrounded = false,
+
+    -- Tracking properties
+    playerId = -1,
+    playerX = 0,
+    playerY = 0,
+    moving = false,
 }
 
 orc.__index = orc
@@ -52,13 +59,33 @@ end
 
 function orc:OnInit()
 	self.Play(self.action)
+    playerId = FindEntitybyName("player1")
 end
 
 function orc:OnUpdate(dt)
     local newAction = "Idle"
 
+    -- Tracking the player
+    local playerAction = GetEntityString(playerId, "action")
+    local playerX = GetEntityFloat(playerId, "x")
+    local playerY = GetEntityFloat(playerId, "y")
+
     -- Movements
-    if KeyA == 0 and KeyB == 0 then
+    
+    if playerAction ~= "dead" then
+        self.moving = true
+        if playerX < self.x then
+            self.dx = self.dx - self.speed * dt
+        elseif playerX > self.x then
+            self.dx = self.dx + self.speed * dt
+        end
+        if (playerY > self.y) and self.isGrounded then
+            self.dy = self.dy - self.jumpStrength
+        end
+    else
+        self.moving = false
+    end
+    if self.moving == false then
         if self.dx > 0 then
             self.dx = math.max(0, self.dx - self.friction * dt)
         elseif self.dx < 0 then
@@ -130,6 +157,8 @@ end
 function orc:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
     if tag == "wall" then
         self:fullCollision(overlapX, overlapY, overlapW, overlapH)
+    elseif tag == "player" then
+        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     elseif tag == "orc" then
         self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     end

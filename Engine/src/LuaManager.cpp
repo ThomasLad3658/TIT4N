@@ -132,6 +132,10 @@ bool LuaManager::GetFields(std::string fieldsPath) {
 
 	lua_getfield(L, -1, fields.back().c_str());
 	lua_remove(L, -2);
+	if(lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		return false;
+	}
 
 	return true;
 }
@@ -192,4 +196,12 @@ int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* o
 
 void LuaManager::DereferenceObj(int ref) {
 	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+}
+
+bool LuaManager::TryVariable(const char* name) {
+	if (!GetFields(name)) {
+		return false;
+	}
+	lua_pop(L, 1);
+	return true;
 }

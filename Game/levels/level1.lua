@@ -2,6 +2,7 @@ level1 = {
 	entities = {
 		entity1 = {
 			tag = "player",
+			name = "player1",
 			x = -50,
 			y = -100
 		},
@@ -27,6 +28,7 @@ level1 = {
 		},
 		entity6 = {
 			tag = "orc",
+			name = "orc1",
 			x = 100,
 			y = -100
 		}

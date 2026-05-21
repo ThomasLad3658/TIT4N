@@ -64,6 +64,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
+	luaManager->RegisterFunction(this, &Game::FindEntitybyName, "FindEntitybyName");
 	luaManager->RegisterFunction(this, &Game::GetEntityVariable<int>, "GetEntityInt");
 	luaManager->RegisterFunction(this, &Game::GetEntityVariable<float>, "GetEntityFloat");
 	luaManager->RegisterFunction(this, &Game::GetEntityVariable<bool>, "GetEntityBool");
@@ -112,8 +113,10 @@ void Game::Run() {
 		}
 
 		physicsSystem->Update();
-
+		
 		renderSystem->render();
+
+		soundSystem->update();
 
 		sceneManager->Update();
 
@@ -134,7 +137,6 @@ void Game::Run() {
 			// Not precise enough
 			//SDL_Delay((frameDelay - frameTime) / 1000000);
 		}
-		soundSystem->update();
 	}
 }
 
@@ -194,23 +196,7 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 	float dstScale = luaManager->GetVariable<float>((objPath + ".dstScale").c_str());
 	float w = luaManager->GetVariable<float>((objPath + ".srcrect.w").c_str());
 	float h = luaManager->GetVariable<float>((objPath + ".srcrect.h").c_str());
-	std::unique_ptr<Entity> entity = std::make_unique<Entity>(
-		tag,
-		ref,
-		luaManager->GetVariable<std::string>((objPath + ".path").c_str()),
-		SDL_FRect{
-			luaManager->GetVariable<float>((objPath + ".srcrect.x").c_str()),
-			luaManager->GetVariable<float>((objPath + ".srcrect.y").c_str()),
-			w,
-			h
-		},
-		SDL_FRect{
-			luaManager->GetVariable<float>((objPath + ".x").c_str()),
-			luaManager->GetVariable<float>((objPath + ".y").c_str()),
-			dstScale * w,
-			dstScale * h
-		}
-	);
+	std::unique_ptr<Entity> entity = std::make_unique<Entity>(ref);
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::PlayAnimation, objPath.c_str(), "Play");
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::destroy, objPath.c_str(), "Suicide");
 	return entity;
@@ -248,4 +234,13 @@ bool Game::unregisterEntity(Entity* entity) {
 		}
 	}
 	return false;
+}
+
+int Game::FindEntitybyName(std::string name) {
+	for (const auto& e : entities) {
+		if (e->getName() == name) {
+			return e->getId();
+		}
+	}
+	return -1;
 }

@@ -1,6 +1,7 @@
 wall = {
     -- Graphic infos
     path     = "Game/assets/sprites/wall/wall.png",
+    mirroredH = false, mirroredV = false,
     visible  = true,
 
     -- Position infos

@@ -6,13 +6,7 @@
 
 class Entity {
 public:
-	Entity(
-		std::string tag, 
-		int referenceIndex,
-		std::string filepath, 
-		const SDL_FRect& src, 
-		const SDL_FRect& dst
-	);
+	Entity(int referenceIndex);
 	~Entity();
 	void Init(SDL_Renderer* sdlRenderer);
 	void destroy();
@@ -21,9 +15,11 @@ public:
 	void PlayAnimation(std::string animationName);
 	void Collisions(std::string tag, unsigned int id, SDL_FRect overlap);
 	bool isInitialized() const;
+	bool isVisible() const;
 	void setRenderLayer(unsigned char z);
 	SDL_FRect* getDstRect();
 	std::string getTag() const;
+	std::string getName() const;
 	unsigned char getRenderLayer() const;
 	unsigned int getId() const;
 	unsigned int getReferenceIndex() const;
@@ -38,21 +34,21 @@ protected:
 	SDL_FRect dstrect;
 	SDL_FRect hitbox;
 
-	int animationRow = 0;
-	int animationFrameCount = 0;
-	int animationCurrentFrame = 0;
-	int animationFPS = 0;
-	bool animationLoop = true;
-	bool mirroredH = false;
-	bool mirroredV = false;
-	bool visible = true;
-	double angle = 0;
-	float animationTimer = 0;
+	int animationRow;
+	int animationFrameCount;
+	int animationCurrentFrame;
+	int animationFPS;
+	bool animationLoop;
+	bool mirroredH;
+	bool mirroredV;
+	bool visible;
+	double angle;
+	float animationTimer;
 
 	std::string tag;
+	std::string name;
 	unsigned char renderLayer;
-	bool isStatic;
-	bool initialized = false;
+	bool initialized;
 
 	unsigned int id;
 	int referenceIndex;

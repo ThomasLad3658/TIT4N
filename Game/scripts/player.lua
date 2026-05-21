@@ -6,7 +6,7 @@ player = {
     mirroredH = false, mirroredV = false,
     visible  = true,
     animations = {
-        Idle = { row = 0, frameCount = 6, fps = 9, loop = true  },
+        Idle = { row = 0, frameCount = 6, fps = 8, loop = true  },
         Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
         Attack = { row = 2, frameCount = 6, fps = 12, loop = false },
         dead = { row = 6, frameCount = 4, fps = 4, loop = false }
@@ -27,9 +27,9 @@ player = {
     maxSpeed = 8,
     speed = 20,
     friction = 30,
-    jumpStrength = 500,
+    jumpStrength = 8,
     isGrounded = false,
-    timeBeforeSuicide = 1000
+    timeBeforeSuicide = 1,
 }
 
 player.__index = player
@@ -72,7 +72,7 @@ function player:OnUpdate(dt)
         self.dx = self.dx + self.speed * dt
     end
     if KeySpace == 2 and self.isGrounded then
-        self.dy = self.dy - self.jumpStrength * dt
+        self.dy = self.dy - self.jumpStrength
     end
 
     if KeyA == 0 and KeyB == 0 then
@@ -88,7 +88,7 @@ function player:OnUpdate(dt)
     if self.hp <= 0 then
         self.dx = 0
         self.dy = 0
-    else
+    end
 
     self.dy = self.dy + 30 * dt
 
@@ -100,8 +100,7 @@ function player:OnUpdate(dt)
     -- Check life
     if self.hp <= 0 then
         if self.timeBeforeSuicide <= 0 then
-            self.Suicide()
-        end
+            --self.Suicide()
         else
             self.timeBeforeSuicide = self.timeBeforeSuicide - dt
         end
@@ -170,10 +169,9 @@ function player:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlap
     elseif tag == "player" then
         self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     elseif tag == "orc" then
-        self:fullCollision(overlapX, overlapY, overlapW, overlapH)
+        self:partialCollision(overlapX, overlapY, overlapW, overlapH)
         if GetEntityBool(entityId, "visible") then
             self.hp = self.hp - 5
-            print("Player hit by orc! HP: " .. self.hp)
         end
     end
 end
@@ -183,24 +181,29 @@ function player:OnDestroy()
 end
 
 --[[
-    -- Required -> they will cause a crash if not specified
-    path
-    x, y
-    srcrect
-    dstScale
-    hitbox
-    angle       -> Can cause unexpected behaviour if not specified
-    z           -> Can cause unexpected behaviour if not specified
-    new()       -> Never modify, never remove
-    All 4 other functions ( OnInit, OnUpdate, OnCollision, OnDestroy ) -> Crash if not specified, can be empty
+    -- Required   -> They can cause a crash if not specified
+    x, y          -> Required
+    srcrect       -> Required
+    dstScale      -> Required
+    hitbox        -> Required
+    visible       -> Can be nil if path = "" (will be set to false)
+    angle         -> Can be nil if path = "" or visible = false (will be set to 0)
+    z             -> Can be nil if path = "" or visible = false (will be set to 0)
+    mirroredH     -> Can be nil if path = "" or visible = false (will be set to false)
+    mirroredV     -> Can be nil if path = "" or visible = false (will be set to false)
+    animations    -> Crash if Play() is called without this table
+    new()         -> Never modify, never remove, don't touch it
+    OnInit()      -> Can be empty
+    OnUpdate()    -> Can be empty
+    OnCollision() -> Can be empty
+    OnDestroy()   -> Can be empty
 
-    -- Optional -> they might cause unexpected behaviour (nil) if not specified or crash in some cases, but they are not required
-    mirroredH   -> if not specified, they are set to false by default
-    mirroredV   -> if not specified, they are set to false by default
-    visible     -> if not specified, it is set to false by default (invisible)
-    animations  -> Crash if Play is called without this table
-    action      -> to help you manage your animations, not used by the engine, but useful for your scripts
-    dx, dy      -> to help you manage your movements, not used by the engine, but useful for your scripts
+    -- Optional   -> Used by the engine if specified, but won't cause a crash if not specified
+    path          -> Will be set to "" if not specified, and the entity will be invisible
+    name		  -> Will be set to "" if not specified
 
-    More functions and properties can be added as you want, they will be ignored by the engine if not used, but they can be useful for your scripts
+    -- Custom     -> Custom properties and functions for your entities, they will be ignored by the engine
+    action        -> to help you manage your animations
+    dx, dy        -> to help you manage your movements
+    Anything      -> More useful functions and properties can be added, as much as you want
 ]]

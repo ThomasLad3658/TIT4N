@@ -31,7 +31,7 @@ bool RenderSystem::render() {
 	for (unsigned int i = 0; i < 256; i++) {
 		if (renderLayers.find(i) != renderLayers.end()) {
 			for (unsigned int j = 0; j < renderLayers[i].size(); j++) {
-				renderLayers[i][j]->present();
+				if(renderLayers[i][j]->isVisible()) renderLayers[i][j]->present();
 			}
 		}
 	}

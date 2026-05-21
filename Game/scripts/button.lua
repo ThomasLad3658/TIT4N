@@ -2,6 +2,7 @@ button = {
     -- Graphic infos
     path     = "Game/assets/sprites/button/button.png",
     action = "default",
+    mirroredH = false, mirroredV = false,
     visible  = true,
     animations = {
         default = { row = 0, frameCount = 1, fps = 0, loop = false  },

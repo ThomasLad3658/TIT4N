@@ -33,6 +33,7 @@ public:
 	int GetFieldSize(std::string fieldsPath);
 	int ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath);
 	void DereferenceObj(int ref);
+	bool TryVariable(const char* name);
 private:
 	lua_State* L = nullptr;
 	bool GetFields(std::string fieldsPath);
