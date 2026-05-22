@@ -23,6 +23,7 @@ public:
 	void RegisterFunction(O* obj, R(O::*func)(Args...), const char* name);
 	template <typename R, typename O, typename... Args>
 	void RegisterFunctionToLuaField(O* obj, R(O::* func)(Args...), const char* fieldPath, const char* name);
+	bool TryFile(const char* path);
 	bool DoFile(const char* path);
 	template <typename T, typename... Args>
 	T callFunction(const char* name, bool requiresSelf, Args... args);
@@ -31,9 +32,11 @@ public:
 	template <typename T>
 	void SetVariable(std::string name, T value);
 	int GetFieldSize(std::string fieldsPath);
+	int ReferenceNewObj(const char* blueprintPath);
 	int ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath);
 	void DereferenceObj(int ref);
 	bool TryVariable(const char* name);
+	bool TryFunction(const char* name);
 private:
 	lua_State* L = nullptr;
 	bool GetFields(std::string fieldsPath);

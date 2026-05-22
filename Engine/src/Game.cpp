@@ -64,6 +64,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(this, &Game::SetWindowTitle, "SetWindowTitle");
 	luaManager->RegisterFunction(this, &Game::SetWindowSize, "SetWindowSize");
 	luaManager->RegisterFunction(this, &Game::SetFrameRate, "SetFrameRate");
+	luaManager->RegisterFunction(this, &Game::CreateEntityFromLua, "CreateEntity");
 	luaManager->RegisterFunction(this, &Game::FindEntitybyName, "FindEntitybyName");
 	luaManager->RegisterFunction(this, &Game::IsEntityAlive, "IsEntityAlive");
 	luaManager->RegisterFunction(this, &Game::GetEntityVariable<int>, "GetEntityInt");
@@ -120,6 +121,10 @@ void Game::Run() {
 		soundSystem->update();
 
 		sceneManager->Update();
+
+		for (int i = 0; i < creationQueue.size(); i++) {
+			registerEntity(std::move(creationQueue[i]));
+		}
 
 		for (auto& entity : deletionQueue) {
 			unregisterEntity(entity);
@@ -191,17 +196,26 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 	int ref;
 
 	std::string tag = luaManager->GetVariable<std::string>((dataPath + ".tag").c_str());
-	luaManager->DoFile((getBasePath() + "Game/scripts/" + tag + ".lua").c_str());
-	ref = luaManager->ReferenceNewObjWithPath(tag.c_str(), dataPath.c_str());
+	if (luaManager->TryFile((getBasePath() + "Game/scripts/" + tag + ".lua").c_str())) {
+		luaManager->DoFile((getBasePath() + "Game/scripts/" + tag + ".lua").c_str());
+		ref = luaManager->ReferenceNewObjWithPath(tag.c_str(), dataPath.c_str());
+	}
+	else {
+		ref = luaManager->ReferenceNewObj(dataPath.c_str());
+	}
+	
 	std::string objPath = "/" + std::to_string(ref);
-	float dstScale = luaManager->GetVariable<float>((objPath + ".dstScale").c_str());
-	float w = luaManager->GetVariable<float>((objPath + ".srcrect.w").c_str());
-	float h = luaManager->GetVariable<float>((objPath + ".srcrect.h").c_str());
 	std::unique_ptr<Entity> entity = std::make_unique<Entity>(ref);
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::PlayAnimation, objPath.c_str(), "Play");
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::destroy, objPath.c_str(), "Suicide");
 	return entity;
 
+}
+
+void Game::CreateEntityFromLua(std::string entityPath) {
+	std::unique_ptr<Entity> entity = CreateEntity(entityPath);
+	entity->Init(renderSystem->getRenderer());
+	creationQueue.push_back(std::move(entity));
 }
 
 bool Game::DeleteEntity(Entity* entity) {

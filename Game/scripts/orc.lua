@@ -19,7 +19,7 @@ orc = {
     dstScale = 5,
 
     -- Behavior infos
-    hitbox  = { ox = 220, oy = 195, w = 60, h = 90 },
+    hitbox  = { ox = 220, oy = 210, w = 60, h = 75 },
 
 -- Custom properties (optional properties) do what you want here
     -- Physics properties
@@ -34,6 +34,22 @@ orc = {
     playerX = 0,
     playerY = 0,
     moving = false,
+
+    -- Attack properties
+    timeBeforeAttackFrame = 0,
+    timeBeforNextAttack = 0,
+    axe = {
+        tag = "orc_attack",
+        hitbox = { ox = 0, oy = 0, w = 75, h = 130 },
+        damage = 10,
+        updateAlive= 1,
+        OnUpdate = function(self, dt)
+            if self.updateAlive == 0 then
+                self.Suicide()
+            end
+            self.updateAlive = self.updateAlive - 1
+        end
+    },
 }
 
 orc.__index = orc
@@ -46,14 +62,6 @@ function orc:new(overrides)
             instance[key] = value
         end
     end
-    assert(instance.path ~= nil, "path is required")
-    assert(instance.srcrect ~= nil, "srcrect is required")
-    assert(instance.dstScale ~= nil, "dstScale is required")
-    assert(instance.x ~= nil, "x is required")
-    assert(instance.y ~= nil, "y is required")
-    assert(instance.hitbox ~= nil, "hitbox is required")
-    assert(instance.angle ~= nil, "angle is required")
-    assert(instance.z ~= nil, "z is required")
     return instance
 end
 
@@ -78,8 +86,13 @@ function orc:OnUpdate(dt)
             elseif playerX > self.x then
                 self.dx = self.dx + self.speed * dt
             end
-            if (playerY > self.y) and self.isGrounded then
-                self.dy = self.dy - self.jumpStrength
+            if playerY - self.y > self.hitbox.h / 2 and self.isGrounded then
+                self.ay = self.ay - self.jumpStrength
+            end
+            if playerX - (self.x + self.hitbox.w + self.axe.hitbox.w) <= 0 or playerX + (self.x + self.hitbox.w + self.axe.hitbox.w) then
+                if self.action ~= "Attack" then
+                    newAction = "Attack"
+                end
             end
         else
             self.moving = false
@@ -95,21 +108,46 @@ function orc:OnUpdate(dt)
 
     self.dx = math.max(-self.maxSpeed, math.min(self.dx, self.maxSpeed))
 
-    self.dy = self.dy + 30 * dt
+    if self.dx < 0 then
+        self.mirroredH = true
+    elseif self.dx > 0 then
+        self.mirroredH = false
+    end
+
+    self.dy = self.dy + gravity * dt
 
     self.x = self.x + self.dx
     self.y = self.y + self.dy
     
     self.isGrounded = false
 
-    -- Animations
-    if self.dx ~= 0 then
-        newAction = "Walk"
+    -- Attack
+    if newAction == "Attack" then
+        self.timeBeforeAttackFrame = 0.25
+        self.timeBeforeNextAttack = 0.5
     end
-    if self.dx < 0 then
-        self.mirroredH = true
-    elseif self.dx > 0 then
-        self.mirroredH = false
+    if action == "Attack" then
+        self.timeBeforeAttackFrame = self.timeBeforeAttackFrame - dt
+        self.timeBeforeNextAttack = self.timeBeforeNextAttack - dt
+        if self.timeBeforeAttackFrame <= 0 then
+            if mirroredH then
+                self.axe.hitbox.ox = -self.axe.hitbox.w
+            else
+                self.axe.hitbox.ox = self.hitbox.w
+            end
+            CreateEntity("orc/axe")
+        end
+    end
+
+    -- Animations
+    if self.action == "Attack" then
+        newAction = "Attack"
+    end
+    if self.timeBeforeNextAttack <= 0 and self.action == "Attack" then
+        newAction = "Idle"
+    end
+    if self.dx ~= 0 and newAction == "Idle" then
+        newAction = "Walk"
     end
     if newAction ~= self.action then
         self.action = newAction

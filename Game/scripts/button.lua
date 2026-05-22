@@ -30,14 +30,6 @@ function button:new(overrides)
             instance[key] = value
         end
     end
-    assert(instance.path ~= nil, "path is required")
-    assert(instance.srcrect ~= nil, "srcrect is required")
-    assert(instance.dstScale ~= nil, "dstScale is required")
-    assert(instance.x ~= nil, "x is required")
-    assert(instance.y ~= nil, "y is required")
-    assert(instance.hitbox ~= nil, "hitbox is required")
-    assert(instance.angle ~= nil, "angle is required")
-    assert(instance.z ~= nil, "z is required")
     return instance
 end
 

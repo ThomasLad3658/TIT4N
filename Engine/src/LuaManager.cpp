@@ -1,6 +1,7 @@
 #include "LuaManager.hpp"
 #include "Game.hpp"
 #include "Entity.hpp"
+#include <filesystem>
 
 template <typename T, typename S>
 T lua_get(lua_State* L, int index) {
@@ -140,6 +141,13 @@ bool LuaManager::GetFields(std::string fieldsPath) {
 	return true;
 }
 
+bool LuaManager::TryFile(const char* path) {
+	if (std::filesystem::exists(path)) {
+		return true;
+	}
+	return false;
+}
+
 bool LuaManager::DoFile(const char* path) {
 	if (luaL_dofile(L, path) != LUA_OK) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
@@ -161,6 +169,18 @@ int LuaManager::GetFieldSize(std::string fieldsPath) {
 
 	lua_pop(L, 1);
 	return count;
+}
+
+int LuaManager::ReferenceNewObj(const char* blueprintPath)
+{
+	GetFields(blueprintPath);
+	if (!lua_istable(L, -1)) {
+		lua_pop(L, 1);
+		throw std::runtime_error(std::string("Blueprint not found: ") + blueprintPath);
+	}
+	
+	return luaL_ref(L, LUA_REGISTRYINDEX);
+
 }
 
 int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath) {
@@ -200,6 +220,18 @@ void LuaManager::DereferenceObj(int ref) {
 
 bool LuaManager::TryVariable(const char* name) {
 	if (!GetFields(name)) {
+		return false;
+	}
+	lua_pop(L, 1);
+	return true;
+}
+
+bool LuaManager::TryFunction(const char* name) {
+	if (!GetFields(name)) {
+		return false;
+	}
+	if (!lua_isfunction(L, -1)) {
+		lua_pop(L, 1);
 		return false;
 	}
 	lua_pop(L, 1);

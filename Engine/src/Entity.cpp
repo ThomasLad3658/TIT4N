@@ -16,18 +16,9 @@ Entity::Entity(int referenceIndex) : referenceIndex(referenceIndex) {
 	renderer = nullptr;
 	texture = nullptr;
 
-	srcrect = {
-		luaManager->GetVariable<float>((objPath + ".srcrect.x").c_str()),
-		luaManager->GetVariable<float>((objPath + ".srcrect.y").c_str()),
-		w,
-		h
-	};
-	dstrect = {
-		luaManager->GetVariable<float>((objPath + ".x").c_str()),
-		luaManager->GetVariable<float>((objPath + ".y").c_str()),
-		dstScale * w,
-		dstScale * h
-	};
+	srcrect = { 0.0f, 0.0f,  0.0f,  0.0f };
+	dstrect = { 0.0f, 0.0f,  0.0f,  0.0f };
+
 	hitbox = { 0.0f, 0.0f , 0.0f , 0.0f };
 
 	animationRow = 0;
@@ -52,7 +43,8 @@ Entity::Entity(int referenceIndex) : referenceIndex(referenceIndex) {
 }
 
 Entity::~Entity() {
-	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnDestroy").c_str(), true);
+	if (ServiceLocator::getLuaManager()->TryFunction(("/" + std::to_string(referenceIndex) + ".OnDestroy").c_str()))
+		ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnDestroy").c_str(), true);
 	if (initialized == true) {
 		SDL_DestroyTexture(texture);
 	}
@@ -70,6 +62,7 @@ void Entity::Init(SDL_Renderer* sdlRenderer) {
 	}
 	else visible = false;
 
+	if (ServiceLocator::getLuaManager()->TryFunction(("/" + std::to_string(referenceIndex) + ".OnInit").c_str()))
 	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnInit").c_str(), true);
 
 	initialized = true;
@@ -106,34 +99,35 @@ void Entity::Update(float dt)
 {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 
-	luaManager->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnUpdate").c_str(), true, dt);
+	std::string objPath = "/" + std::to_string(referenceIndex);
+	if (luaManager->TryFunction((objPath + ".OnUpdate").c_str()))
+		luaManager->callFunction<void>((objPath + ".OnUpdate").c_str(), true, dt);
 
-	float dstScale = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".dstScale").c_str());
-	srcrect = {
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.x").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.y").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.w").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".srcrect.h").c_str())
-	};
-	dstrect = {
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".x").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".y").c_str()),
-		dstScale* srcrect.w,
-		dstScale* srcrect.h
-	};
+	dstrect.x = luaManager->GetVariable<float>((objPath + ".x").c_str());
+	dstrect.y = luaManager->GetVariable<float>((objPath + ".y").c_str());
+
 	hitbox = {
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.ox").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.oy").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.w").c_str()),
-		luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".hitbox.h").c_str())
+		luaManager->GetVariable<float>((objPath + ".hitbox.ox").c_str()),
+		luaManager->GetVariable<float>((objPath + ".hitbox.oy").c_str()),
+		luaManager->GetVariable<float>((objPath + ".hitbox.w").c_str()),
+		luaManager->GetVariable<float>((objPath + ".hitbox.h").c_str())
 	};
 	if (filepath != "") {
-		visible = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".visible").c_str());
+		visible = luaManager->GetVariable<bool>((objPath + ".visible").c_str());
 		if (visible) {
-			angle = luaManager->GetVariable<float>(("/" + std::to_string(referenceIndex) + ".angle").c_str());
-			mirroredH = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredH").c_str());
-			mirroredV = luaManager->GetVariable<bool>(("/" + std::to_string(referenceIndex) + ".mirroredV").c_str());
-			renderLayer = luaManager->GetVariable<int>(("/" + std::to_string(referenceIndex) + ".z").c_str());
+			float dstScale = luaManager->GetVariable<float>((objPath + ".dstScale").c_str());
+			srcrect = {
+				luaManager->GetVariable<float>((objPath + ".srcrect.x").c_str()),
+				luaManager->GetVariable<float>((objPath + ".srcrect.y").c_str()),
+				luaManager->GetVariable<float>((objPath + ".srcrect.w").c_str()),
+				luaManager->GetVariable<float>((objPath + ".srcrect.h").c_str())
+			};
+			dstrect.w = dstScale * srcrect.w;
+			dstrect.h = dstScale * srcrect.h;
+			angle = luaManager->GetVariable<float>((objPath + ".angle").c_str());
+			mirroredH = luaManager->GetVariable<bool>((objPath + ".mirroredH").c_str());
+			mirroredV = luaManager->GetVariable<bool>((objPath + ".mirroredV").c_str());
+			renderLayer = luaManager->GetVariable<int>((objPath + ".z").c_str());
 		}
 	}
 
@@ -171,7 +165,8 @@ void Entity::PlayAnimation(std::string animationName) {
 }
 
 void Entity::Collisions(std::string tag, unsigned int id, SDL_FRect overlap) {
-	ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnCollision").c_str(), true, tag, id, overlap.x, overlap.y, overlap.w, overlap.h);
+	if (ServiceLocator::getLuaManager()->TryFunction(("/" + std::to_string(referenceIndex) + ".OnCollision").c_str()))
+		ServiceLocator::getLuaManager()->callFunction<void>(("/" + std::to_string(referenceIndex) + ".OnCollision").c_str(), true, tag, id, overlap.x, overlap.y, overlap.w, overlap.h);
 }
 
 void Entity::setRenderLayer(unsigned char z) {

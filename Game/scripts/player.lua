@@ -27,7 +27,7 @@ player = {
     maxSpeed = 8,
     speed = 20,
     friction = 30,
-    jumpStrength = 8,
+    jumpStrength = 12,
     isGrounded = false,
     timeBeforeSuicide = 1,
 }
@@ -42,14 +42,6 @@ function player:new(overrides)
             instance[key] = value
         end
     end
-    assert(instance.path ~= nil, "path is required")
-    assert(instance.srcrect ~= nil, "srcrect is required")
-    assert(instance.dstScale ~= nil, "dstScale is required")
-    assert(instance.x ~= nil, "x is required")
-    assert(instance.y ~= nil, "y is required")
-    assert(instance.hitbox ~= nil, "hitbox is required")
-    assert(instance.angle ~= nil, "angle is required")
-    assert(instance.z ~= nil, "z is required")
     return instance
 end
 
@@ -90,7 +82,7 @@ function player:OnUpdate(dt)
         self.dy = 0
     end
 
-    self.dy = self.dy + 30 * dt
+    self.dy = self.dy + gravity * dt
 
     self.x = self.x + self.dx
     self.y = self.y + self.dy
@@ -170,9 +162,9 @@ function player:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlap
         self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     elseif tag == "orc" then
         self:partialCollision(overlapX, overlapY, overlapW, overlapH)
-        if GetEntityBool(entityId, "visible") then
-            self.hp = self.hp - 5
-        end
+    elseif tag == "orc_attack" then
+        self.hp = self.hp - 10
+        print("Player hit! HP: " .. self.hp)
     end
 end
 
@@ -182,25 +174,26 @@ end
 
 --[[
     -- Required   -> They can cause a crash if not specified
+    tag           -> Required
     x, y          -> Required
-    srcrect       -> Required
-    dstScale      -> Required
     hitbox        -> Required
     visible       -> Can be nil if path = "" (will be set to false)
+    srcrect       -> Can be nil if path = "" or visible = false (will be set to 0)
+    dstScale      -> Can be nil if path = "" or visible = false (will be set to 0)
     angle         -> Can be nil if path = "" or visible = false (will be set to 0)
     z             -> Can be nil if path = "" or visible = false (will be set to 0)
     mirroredH     -> Can be nil if path = "" or visible = false (will be set to false)
     mirroredV     -> Can be nil if path = "" or visible = false (will be set to false)
     animations    -> Crash if Play() is called without this table
     new()         -> Never modify, never remove, don't touch it
-    OnInit()      -> Can be empty
-    OnUpdate()    -> Can be empty
-    OnCollision() -> Can be empty
-    OnDestroy()   -> Can be empty
 
     -- Optional   -> Used by the engine if specified, but won't cause a crash if not specified
     path          -> Will be set to "" if not specified, and the entity will be invisible
     name		  -> Will be set to "" if not specified
+    OnInit()      -> Will be skipped if not specified
+    OnUpdate()    -> Will be skipped if not specified
+    OnCollision() -> Will be skipped if not specified
+    OnDestroy()   -> Will be skipped if not specified
 
     -- Custom     -> Custom properties and functions for your entities, they will be ignored by the engine
     action        -> to help you manage your animations
