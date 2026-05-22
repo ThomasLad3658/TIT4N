@@ -183,18 +183,18 @@ int LuaManager::ReferenceNewObj(const char* blueprintPath)
 
 }
 
-int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath) {
+int LuaManager::ReferenceNewObjWithPath(const char* blueprintPath, const char* overridesPath) {
 
-	lua_getglobal(L, blueprintName);
+	GetFields(blueprintPath);
 	if (!lua_istable(L, -1)) {
 		lua_pop(L, 1);
-		throw std::runtime_error(std::string("Blueprint not found: ") + blueprintName);
+		throw std::runtime_error(std::string("Blueprint not found: ") + blueprintPath);
 	}
 
 	lua_getfield(L, -1, "new");
 	if (!lua_isfunction(L, -1)) {
 		lua_pop(L, 2);
-		throw std::runtime_error(std::string("Blueprint has no 'new' method: ") + blueprintName);
+		throw std::runtime_error(std::string("Blueprint has no 'new' method: ") + blueprintPath);
 	}
 
 	lua_pushvalue(L, -2);
@@ -206,7 +206,7 @@ int LuaManager::ReferenceNewObjWithPath(const char* blueprintName, const char* o
 	}
 
 	if (lua_pcall(L, 2, 1, 0) != LUA_OK) {
-		std::cerr << "Couldn't create metatable for Lua table : " << blueprintName << " from path : " << overridesPath << " : " << lua_tostring(L, -1) << std::endl;
+		std::cerr << "Couldn't create metatable for Lua table : " << blueprintPath << " from path : " << overridesPath << " : " << lua_tostring(L, -1) << std::endl;
 		throw std::runtime_error("Couldn't create metatable");
 	}
 

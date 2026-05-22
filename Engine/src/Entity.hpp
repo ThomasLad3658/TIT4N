@@ -24,6 +24,7 @@ public:
 	unsigned int getId() const;
 	unsigned int getReferenceIndex() const;
 	SDL_FRect getHitbox() const;
+	void CreateEntityFromEntity(std::string entityPath);
 
 protected:
 	std::string filepath;

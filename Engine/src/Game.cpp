@@ -208,8 +208,9 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 	std::unique_ptr<Entity> entity = std::make_unique<Entity>(ref);
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::PlayAnimation, objPath.c_str(), "Play");
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::destroy, objPath.c_str(), "Suicide");
+	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::CreateEntityFromEntity, objPath.c_str(), "CreateEntityFromEntity");
 	return entity;
-
+	
 }
 
 void Game::CreateEntityFromLua(std::string entityPath) {

@@ -40,6 +40,7 @@ orc = {
     timeBeforNextAttack = 0,
     axe = {
         tag = "orc_attack",
+        x = 0, y = 0,
         hitbox = { ox = 0, oy = 0, w = 75, h = 130 },
         damage = 10,
         updateAlive= 1,
@@ -87,10 +88,12 @@ function orc:OnUpdate(dt)
                 self.dx = self.dx + self.speed * dt
             end
             if playerY - self.y > self.hitbox.h / 2 and self.isGrounded then
-                self.ay = self.ay - self.jumpStrength
+                self.dy = self.dy - self.jumpStrength
             end
-            if playerX - (self.x + self.hitbox.w + self.axe.hitbox.w) <= 0 or playerX + (self.x + self.hitbox.w + self.axe.hitbox.w) then
+            if playerX - (self.x + self.hitbox.w + self.axe.hitbox.w) <= 0 or playerX + (self.x + self.hitbox.w + self.axe.hitbox.w) >= 0 then
                 if self.action ~= "Attack" then
+                    self.timeBeforeAttackFrame = 0.25
+                    self.timeBeforeNextAttack = 0.5
                     newAction = "Attack"
                 end
             end
@@ -122,20 +125,17 @@ function orc:OnUpdate(dt)
     self.isGrounded = false
 
     -- Attack
-    if newAction == "Attack" then
-        self.timeBeforeAttackFrame = 0.25
-        self.timeBeforeNextAttack = 0.5
-    end
-    if action == "Attack" then
+    if self.action == "Attack" then
         self.timeBeforeAttackFrame = self.timeBeforeAttackFrame - dt
         self.timeBeforeNextAttack = self.timeBeforeNextAttack - dt
         if self.timeBeforeAttackFrame <= 0 then
             if mirroredH then
-                self.axe.hitbox.ox = -self.axe.hitbox.w
+                self.axe.x = -self.axe.hitbox.w
             else
-                self.axe.hitbox.ox = self.hitbox.w
+                self.axe.x = self.hitbox.w
             end
-            CreateEntity("orc/axe")
+            self.axe.y = self.y
+            self.CreateEntityFromEntity("axe")
         end
     end
 

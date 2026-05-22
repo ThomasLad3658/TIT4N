@@ -33,7 +33,7 @@ public:
 	void SetVariable(std::string name, T value);
 	int GetFieldSize(std::string fieldsPath);
 	int ReferenceNewObj(const char* blueprintPath);
-	int ReferenceNewObjWithPath(const char* blueprintName, const char* overridesPath);
+	int ReferenceNewObjWithPath(const char* blueprintPath, const char* overridesPath);
 	void DereferenceObj(int ref);
 	bool TryVariable(const char* name);
 	bool TryFunction(const char* name);

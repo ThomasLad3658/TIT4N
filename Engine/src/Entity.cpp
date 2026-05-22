@@ -7,9 +7,6 @@
 Entity::Entity(int referenceIndex) : referenceIndex(referenceIndex) {
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 	std::string objPath = "/" + std::to_string(referenceIndex);
-	float dstScale = luaManager->GetVariable<float>((objPath + ".dstScale").c_str());
-	float w = luaManager->GetVariable<float>((objPath + ".srcrect.w").c_str());
-	float h = luaManager->GetVariable<float>((objPath + ".srcrect.h").c_str());
 
 	if (luaManager->TryVariable((objPath + ".path").c_str())) filepath = luaManager->GetVariable<std::string>((objPath + ".path").c_str());
 	else filepath = "";
@@ -204,4 +201,8 @@ SDL_FRect Entity::getHitbox() const {
 		hitbox.w,
 		hitbox.h
 	};
+}
+
+void Entity::CreateEntityFromEntity(std::string entityPath) {
+	ServiceLocator::getGame()->CreateEntityFromLua("/" + std::to_string(referenceIndex) + "." + entityPath);
 }
