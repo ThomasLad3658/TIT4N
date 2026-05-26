@@ -129,6 +129,8 @@ void Game::Run() {
 		for (auto& entity : deletionQueue) {
 			unregisterEntity(entity);
 		}
+		creationQueue.clear();
+		deletionQueue.clear();
 		
 		inputManager->EndOfFrame();
 
@@ -194,7 +196,7 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 	
 	LuaManager* luaManager = ServiceLocator::getLuaManager();
 	int ref;
-
+	
 	std::string tag = luaManager->GetVariable<std::string>((dataPath + ".tag").c_str());
 	if (luaManager->TryFile((getBasePath() + "Game/scripts/" + tag + ".lua").c_str())) {
 		luaManager->DoFile((getBasePath() + "Game/scripts/" + tag + ".lua").c_str());
@@ -209,6 +211,7 @@ std::unique_ptr<Entity> Game::CreateEntity(std::string dataPath) {
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::PlayAnimation, objPath.c_str(), "Play");
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::destroy, objPath.c_str(), "Suicide");
 	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::CreateEntityFromEntity, objPath.c_str(), "CreateEntityFromEntity");
+	luaManager->RegisterFunctionToLuaField(entity.get(), &Entity::getId, objPath.c_str(), "getSelfId");
 	return entity;
 	
 }

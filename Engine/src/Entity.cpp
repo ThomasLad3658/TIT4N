@@ -186,7 +186,7 @@ unsigned char Entity::getRenderLayer() const {
 	return renderLayer;
 }
 
-unsigned int Entity::getId() const {
+int Entity::getId() {
 	return id;
 }
 

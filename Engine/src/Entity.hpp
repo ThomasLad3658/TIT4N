@@ -21,7 +21,7 @@ public:
 	std::string getTag() const;
 	std::string getName() const;
 	unsigned char getRenderLayer() const;
-	unsigned int getId() const;
+	int getId();
 	unsigned int getReferenceIndex() const;
 	SDL_FRect getHitbox() const;
 	void CreateEntityFromEntity(std::string entityPath);

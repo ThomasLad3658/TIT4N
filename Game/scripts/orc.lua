@@ -38,15 +38,27 @@ orc = {
     -- Attack properties
     timeBeforeAttackFrame = 0,
     timeBeforNextAttack = 0,
+    canAttack = true,
     axe = {
+        orcId = -1,
         tag = "orc_attack",
         x = 0, y = 0,
         hitbox = { ox = 0, oy = 0, w = 75, h = 130 },
         damage = 10,
-        updateAlive= 1,
+        updateAlive = 1,
+        OnInit = function(self)
+            if GetEntityBool(self.orcId, "mirroredH") then
+                self.x = GetEntityFloat(self.orcId, "x") - self.hitbox.w
+            else
+                self.x = GetEntityFloat(self.orcId, "x") + self.hitbox.w
+            end
+            self.y = GetEntityFloat(self.orcId, "y")
+            self.updateAlive = 1
+        end,
         OnUpdate = function(self, dt)
             if self.updateAlive == 0 then
                 self.Suicide()
+                print("Suicided")
             end
             self.updateAlive = self.updateAlive - 1
         end
@@ -78,6 +90,7 @@ function orc:OnUpdate(dt)
     if IsEntityAlive(self.playerId) then
         local playerAction = GetEntityString(self.playerId, "action")
         local playerX = GetEntityFloat(self.playerId, "x")
+        local playerW = GetEntityFloat(self.playerId, "hitbox.w")
         local playerY = GetEntityFloat(self.playerId, "y")
 
         if playerAction ~= "dead" then
@@ -90,11 +103,12 @@ function orc:OnUpdate(dt)
             if playerY - self.y > self.hitbox.h / 2 and self.isGrounded then
                 self.dy = self.dy - self.jumpStrength
             end
-            if playerX - (self.x + self.hitbox.w + self.axe.hitbox.w) <= 0 or playerX + (self.x + self.hitbox.w + self.axe.hitbox.w) >= 0 then
+            if playerX - (self.x + self.hitbox.w) <= self.axe.hitbox.w or (playerX + playerW) - self.x >= -self.axe.hitbox.w then
                 if self.action ~= "Attack" then
                     self.timeBeforeAttackFrame = 0.25
                     self.timeBeforeNextAttack = 0.5
                     newAction = "Attack"
+                    canAttack = true
                 end
             end
         else
@@ -128,14 +142,17 @@ function orc:OnUpdate(dt)
     if self.action == "Attack" then
         self.timeBeforeAttackFrame = self.timeBeforeAttackFrame - dt
         self.timeBeforeNextAttack = self.timeBeforeNextAttack - dt
-        if self.timeBeforeAttackFrame <= 0 then
-            if mirroredH then
-                self.axe.x = -self.axe.hitbox.w
+        if self.timeBeforeAttackFrame <= 0 and canAttack then
+            self.axe.orcId = self.getSelfId()
+            if self.mirroredH then
+                self.axe.x = self.x - self.axe.hitbox.w
             else
-                self.axe.x = self.hitbox.w
+                self.axe.x = self.x + self.hitbox.w
             end
             self.axe.y = self.y
             self.CreateEntityFromEntity("axe")
+            canAttack = false
+            print("attack")
         end
     end
 
@@ -143,11 +160,11 @@ function orc:OnUpdate(dt)
     if self.action == "Attack" then
         newAction = "Attack"
     end
-    if self.timeBeforeNextAttack <= 0 and self.action == "Attack" then
-        newAction = "Idle"
-    end
     if self.dx ~= 0 and newAction == "Idle" then
         newAction = "Walk"
+    end
+    if self.timeBeforeNextAttack <= 0 and self.action == "Attack" then
+        newAction = "Idle"
     end
     if newAction ~= self.action then
         self.action = newAction
