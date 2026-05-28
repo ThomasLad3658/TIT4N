@@ -99,7 +99,7 @@ function orc:OnUpdate(dt)
             elseif playerCenter > orcCenter then
                 self.dx = self.dx + self.speed * dt
             end
-            if playerY - orcY > self.hitbox.h / 2 and self.isGrounded then
+            if playerY - orcY < -self.hitbox.h / 2 and self.isGrounded then
                 self.dy = self.dy - self.jumpStrength
             end
             if distanceX <= self.axe.hitbox.w and self.action ~= "Attack" then
@@ -169,7 +169,7 @@ function orc:OnUpdate(dt)
 end
 
 function orc:fullCollision(overlapX, overlapY, overlapW, overlapH)
-    if overlapW < overlapH then
+    if overlapW < overlapH and overlapH > gravity then
         if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
             self.x = self.x - overlapW
             self.dx = math.min(self.dx, 0)
@@ -192,15 +192,17 @@ end
 function orc:partialCollision(overlapX, overlapY, overlapW, overlapH)
     if overlapW < overlapH then
         if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
-            self.x = self.x - overlapW/2
+            self.x = self.x - overlapW / 2
+            self.dx = math.min(self.dx, 0)
         else
-            self.x = self.x + overlapW/2
+            self.x = self.x + overlapW / 2
+            self.dx = math.max(self.dx, 0)
         end
     else
         if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
-            self.y = self.y - overlapH/2
-        else
-            self.y = self.y + overlapH/2
+            self.y = self.y - overlapH
+            self.isGrounded = true
+            self.dy = math.min(self.dy, 0)
         end
     end
 end

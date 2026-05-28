@@ -90,7 +90,7 @@ void Game::Run() {
 		std::cerr << "Window isn't initialized" << std::endl;
 		throw std::runtime_error("Window wasn't created yet");
 	}
-
+	
 	SDL_Event event;
 	running = true;
 	while (running) {
@@ -130,6 +130,7 @@ void Game::Run() {
 		for (auto& entity : deletionQueue) {
 			unregisterEntity(entity);
 		}
+		
 		creationQueue.clear();
 		deletionQueue.clear();
 		
