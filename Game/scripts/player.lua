@@ -164,7 +164,6 @@ function player:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlap
         self:partialCollision(overlapX, overlapY, overlapW, overlapH)
     elseif tag == "orc_attack" then
         self.hp = self.hp - 10
-        print("Player hit! HP: " .. self.hp)
     end
 end
 

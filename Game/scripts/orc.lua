@@ -37,7 +37,7 @@ orc = {
 
     -- Attack properties
     timeBeforeAttackFrame = 0,
-    timeBeforNextAttack = 0,
+    timeBeforeNextAttack = 0,
     canAttack = true,
     axe = {
         orcId = -1,
@@ -45,22 +45,16 @@ orc = {
         x = 0, y = 0,
         hitbox = { ox = 0, oy = 0, w = 75, h = 130 },
         damage = 10,
-        updateAlive = 1,
         OnInit = function(self)
             if GetEntityBool(self.orcId, "mirroredH") then
-                self.x = GetEntityFloat(self.orcId, "x") - self.hitbox.w
+                self.x = GetEntityFloat(self.orcId, "x") + GetEntityFloat(self.orcId, "hitbox.ox") - self.hitbox.w
             else
-                self.x = GetEntityFloat(self.orcId, "x") + self.hitbox.w
+                self.x = GetEntityFloat(self.orcId, "x") + GetEntityFloat(self.orcId, "hitbox.ox") + self.hitbox.w
             end
-            self.y = GetEntityFloat(self.orcId, "y")
-            self.updateAlive = 1
+            self.y = GetEntityFloat(self.orcId, "y") + GetEntityFloat(self.orcId, "hitbox.oy")
         end,
         OnUpdate = function(self, dt)
-            if self.updateAlive == 0 then
-                self.Suicide()
-                print("Suicided")
-            end
-            self.updateAlive = self.updateAlive - 1
+            self.Suicide()
         end
     },
 }
@@ -89,27 +83,30 @@ function orc:OnUpdate(dt)
     -- Movements
     if IsEntityAlive(self.playerId) then
         local playerAction = GetEntityString(self.playerId, "action")
-        local playerX = GetEntityFloat(self.playerId, "x")
+        local playerX = GetEntityFloat(self.playerId, "x") + GetEntityFloat(self.playerId, "hitbox.ox")
         local playerW = GetEntityFloat(self.playerId, "hitbox.w")
-        local playerY = GetEntityFloat(self.playerId, "y")
+        local playerY = GetEntityFloat(self.playerId, "y") + GetEntityFloat(self.playerId, "hitbox.oy")
+        local orcX = self.x + self.hitbox.ox
+        local orcY = self.y + self.hitbox.oy
+        local playerCenter = playerX + playerW / 2
+        local orcCenter = orcX + self.hitbox.w / 2
+        local distanceX = math.abs(playerCenter - orcCenter)
 
         if playerAction ~= "dead" then
             self.moving = true
-            if playerX < self.x then
+            if playerCenter < orcCenter then
                 self.dx = self.dx - self.speed * dt
-            elseif playerX > self.x then
+            elseif playerCenter > orcCenter then
                 self.dx = self.dx + self.speed * dt
             end
-            if playerY - self.y > self.hitbox.h / 2 and self.isGrounded then
+            if playerY - orcY > self.hitbox.h / 2 and self.isGrounded then
                 self.dy = self.dy - self.jumpStrength
             end
-            if playerX - (self.x + self.hitbox.w) <= self.axe.hitbox.w or (playerX + playerW) - self.x >= -self.axe.hitbox.w then
-                if self.action ~= "Attack" then
-                    self.timeBeforeAttackFrame = 0.25
-                    self.timeBeforeNextAttack = 0.5
-                    newAction = "Attack"
-                    canAttack = true
-                end
+            if distanceX <= self.axe.hitbox.w and self.action ~= "Attack" then
+                self.timeBeforeAttackFrame = 0.25
+                self.timeBeforeNextAttack = 0.5
+                newAction = "Attack"
+                self.canAttack = true
             end
         else
             self.moving = false
@@ -142,7 +139,7 @@ function orc:OnUpdate(dt)
     if self.action == "Attack" then
         self.timeBeforeAttackFrame = self.timeBeforeAttackFrame - dt
         self.timeBeforeNextAttack = self.timeBeforeNextAttack - dt
-        if self.timeBeforeAttackFrame <= 0 and canAttack then
+        if self.timeBeforeAttackFrame <= 0 and self.canAttack then
             self.axe.orcId = self.getSelfId()
             if self.mirroredH then
                 self.axe.x = self.x - self.axe.hitbox.w
@@ -151,8 +148,7 @@ function orc:OnUpdate(dt)
             end
             self.axe.y = self.y
             self.CreateEntityFromEntity("axe")
-            canAttack = false
-            print("attack")
+            self.canAttack = false
         end
     end
 
