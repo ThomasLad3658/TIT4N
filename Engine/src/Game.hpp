@@ -21,6 +21,7 @@ public:
 	~Game();
 	void Run();
 	void CreateWindow(const char* title, int width, int height);
+	void Quit();
 	bool SetWindowFullscreen(bool fullscreenValue);
 	bool SetWindowBorderless(bool borderlessValue);
 	bool SetWindowTitle(const char* title);

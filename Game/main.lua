@@ -6,5 +6,7 @@ LoadScene("menus/menu1")
 gravity = 30
 
 function OnUpdate(dt)
-	-- Empty
+	if GetKeyState("Escape") == 2 then
+		Quit()
+	end
 end
