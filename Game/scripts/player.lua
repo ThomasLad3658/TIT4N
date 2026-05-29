@@ -119,7 +119,7 @@ function player:OnUpdate(dt)
 end
 
 function player:fullCollision(overlapX, overlapY, overlapW, overlapH)
-    if overlapW < overlapH then
+    if overlapW < overlapH and overlapH > gravity then
         if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
             self.x = self.x - overlapW
             self.dx = math.min(self.dx, 0)
@@ -142,15 +142,17 @@ end
 function player:partialCollision(overlapX, overlapY, overlapW, overlapH)
     if overlapW < overlapH then
         if overlapX + overlapW/2 > self.x + self.hitbox.ox + self.hitbox.w/2 then
-            self.x = self.x - overlapW/2
+            self.x = self.x - overlapW / 2
+            self.dx = math.min(self.dx, 0)
         else
-            self.x = self.x + overlapW/2
+            self.x = self.x + overlapW / 2
+            self.dx = math.max(self.dx, 0)
         end
     else
         if overlapY + overlapH/2 > self.y + self.hitbox.oy + self.hitbox.h/2 then
-            self.y = self.y - overlapH/2
-        else
-            self.y = self.y + overlapH/2
+            self.y = self.y - overlapH
+            self.isGrounded = true
+            self.dy = math.min(self.dy, 0)
         end
     end
 end
