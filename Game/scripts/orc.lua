@@ -35,6 +35,9 @@ orc = {
     playerY = 0,
     moving = false,
 
+    -- Sound properties
+    soundId = -1,
+
     -- Attack properties
     timeBeforeAttackFrame = 0,
     timeBeforeNextAttack = 0,
@@ -75,6 +78,7 @@ end
 function orc:OnInit()
 	self.Play(self.action)
     self.playerId = FindEntitybyName("player1")
+    soundId = CreateSound("assets/sounds/axe.wav")
 end
 
 function orc:OnUpdate(dt)
@@ -148,6 +152,7 @@ function orc:OnUpdate(dt)
             end
             self.axe.y = self.y
             self.CreateEntityFromEntity("axe")
+            PlaySoundFromTo(soundId, 100, 1200)
             self.canAttack = false
         end
     end
