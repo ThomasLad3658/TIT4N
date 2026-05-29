@@ -76,6 +76,7 @@ void Game::Run() {
 	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetKeyState, "GetKeyState");
 	luaManager->RegisterFunction(inputManager.get(), &InputManager::GetMouseState, "GetMouseState");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::createSound, "CreateSound");
+	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::destroySound, "DestroySound");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::play, "PlaySound");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::playFrom, "PlaySoundFrom");
 	luaManager->RegisterFunction(soundSystem.get(), &SoundSystem::playFromTo, "PlaySoundFromTo");

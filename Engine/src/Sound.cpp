@@ -1,4 +1,5 @@
 #include "Sound.hpp"
+#include "Common.hpp"
 
 void Sound::cleanUp() {
 	usable = false;
@@ -13,7 +14,7 @@ void Sound::cleanUp() {
 }
 
 void Sound::init(std::string filePath) {
-	if (!SDL_LoadWAV(filePath.c_str(), &spec, &buffer, &length)) {
+	if (!SDL_LoadWAV((getBasePath() + "Game/" + filePath).c_str(), &spec, &buffer, &length)) {
 		cleanUp();
 		errorId = SoundErrorId::LOAD_WAV;
 		return;
