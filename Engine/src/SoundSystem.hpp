@@ -13,7 +13,7 @@ public:
 	int createSound(std::string filePath);
 	int createSoundWithDev(std::string filePath, SDL_AudioDeviceID dev);
 	bool exists(int soundId);
-	void destroySound(int soundId);
+	bool destroySound(int soundId);
 	void play(int soundId);
 	void playFrom(int soundId, int startMs);
 	void playFromTo(int soundId, int startMs, int endMs);
