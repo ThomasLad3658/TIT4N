@@ -27,9 +27,9 @@ int SoundSystem::createSoundWithDev(std::string filePath, SDL_AudioDeviceID dev)
     return (int)sounds.size() - 1;
 }
 
-void SoundSystem::destroySound(int soundId) {
-    if (!exists(soundId)) return;
-    sounds[soundId] = nullptr;
+bool SoundSystem::destroySound(int soundId) {
+    if (!exists(soundId)) return false;
+	return unregisterSound(soundId);
 }
 
 void SoundSystem::update() {
