@@ -223,5 +223,5 @@ function orc:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
 end
 
 function orc:OnDestroy()
-	DeleteSound(soundId)
+	DestroySound(soundId)
 end
