@@ -1,7 +1,7 @@
 player = {
 -- Generic properties ( all required)
     -- Graphic infos
-    path     = "Game/assets/sprites/player/Soldier.png",
+    path     = "assets/sprites/player/Soldier.png",
     action = "Idle",
     mirroredH = false, mirroredV = false,
     visible  = true,

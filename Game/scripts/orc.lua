@@ -1,7 +1,7 @@
 orc = {
 -- Generic properties ( all required)
     -- Graphic infos
-    path     = "Game/assets/sprites/orc/Orc.png",
+    path     = "assets/sprites/orc/Orc.png",
     action = "Idle",
     mirroredH = false, mirroredV = false,
     visible  = true,

@@ -1,6 +1,6 @@
 button = {
     -- Graphic infos
-    path     = "Game/assets/sprites/button/button.png",
+    path     = "assets/sprites/button/button.png",
     action = "default",
     mirroredH = false, mirroredV = false,
     visible  = true,

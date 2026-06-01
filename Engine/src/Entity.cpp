@@ -51,7 +51,7 @@ Entity::~Entity() {
 void Entity::Init(SDL_Renderer* sdlRenderer) {
 	renderer = sdlRenderer;
 	if (filepath != "") {
-		texture = IMG_LoadTexture(renderer, filepath.c_str());
+		texture = IMG_LoadTexture(renderer, ("Game/" + filepath).c_str());
 		if (!texture) {
 			std::cerr << "Failed to load entity texture with tag '" << tag << "' : " << SDL_GetError() << std::endl;
 			throw std::runtime_error("entity texture loading failed");
