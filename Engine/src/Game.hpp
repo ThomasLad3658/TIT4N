@@ -35,7 +35,7 @@ public:
 	bool registerEntity(std::unique_ptr<Entity> entity);
 	bool isEntityRegistered(Entity* entity);
 	bool unregisterEntity(Entity* entity);
-	int FindEntitybyName(std::string name);
+	int GetEntityIdByName(std::string name);
 	bool IsEntityAlive(int id);
 	template<typename T>
 	T GetEntityVariable(unsigned int id, std::string variablePath);

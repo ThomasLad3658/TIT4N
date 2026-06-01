@@ -77,7 +77,7 @@ end
 
 function orc:OnInit()
 	self.Play(self.action)
-    self.playerId = FindEntitybyName("player1")
+    self.playerId = GetEntityIdByName("player1")
     soundId = CreateSound("assets/sounds/axe.wav")
 end
 
