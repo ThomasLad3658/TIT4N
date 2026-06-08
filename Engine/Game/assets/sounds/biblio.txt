@@ -1,0 +1,3 @@
+axe.wav : https://pixabay.com/sound-effects/film-special-effects-sword-slice-2-393845/
+forest.wav : https://pixabay.com/sound-effects/film-special-effects-nature-forest-sound-537925/
+music.wav : https://pixabay.com/music/ambient-dark-ambient-121126/
