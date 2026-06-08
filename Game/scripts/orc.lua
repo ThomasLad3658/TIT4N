@@ -78,7 +78,7 @@ end
 function orc:OnInit()
 	self.Play(self.action)
     self.playerId = GetEntityIdByName("player1")
-    soundId = CreateSound("assets/sounds/axe.wav")
+    self.soundId = CreateSound("assets/sounds/axe.wav")
 end
 
 function orc:OnUpdate(dt)
@@ -152,7 +152,7 @@ function orc:OnUpdate(dt)
             end
             self.axe.y = self.y
             self.CreateEntityFromEntity("axe")
-            PlaySoundFromTo(soundId, 100, 1200)
+            PlaySoundFromTo(self.soundId, 100, 1200)
             self.canAttack = false
         end
     end
@@ -223,5 +223,5 @@ function orc:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
 end
 
 function orc:OnDestroy() -- We destroy the sound when the orc is removed from the scene to avoid memory leak
-	DestroySound(soundId) -- The engine will destroy the sound automatically when the engine is closed, but it's good practice to destroy it when we don't need it anymore
+	DestroySound(self.soundId) -- The engine will destroy the sound automatically when the engine is closed, but it's good practice to destroy it when we don't need it anymore
 end
