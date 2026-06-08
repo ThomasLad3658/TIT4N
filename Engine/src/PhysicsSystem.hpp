@@ -18,4 +18,3 @@ private:
 	bool isOverlap(SDL_FRect* rect1, SDL_FRect* rect2);
 	SDL_FRect getOverlap(SDL_FRect* rect1, SDL_FRect* rect2);
 };
-
