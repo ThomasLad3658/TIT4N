@@ -32,6 +32,10 @@ bool SoundSystem::destroySound(int soundId) {
 	return unregisterSound(soundId);
 }
 
+void SoundSystem::CleanUp() {
+    sounds.clear();
+}
+
 void SoundSystem::update() {
     for (auto& sound : sounds) {
         if (sound) sound->update();

@@ -45,6 +45,7 @@ Game::Game() {
 Game::~Game() {
 	std::cout << "Cleaning Game...\n";
 	sceneManager->ClearScene();
+	soundSystem->CleanUp();
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
