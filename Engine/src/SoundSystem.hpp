@@ -28,4 +28,3 @@ private:
 	bool unregisterSound(int soundId);
 	std::vector<std::unique_ptr<Sound>> sounds;
 };
-

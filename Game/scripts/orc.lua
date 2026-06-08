@@ -6,7 +6,7 @@ orc = {
     mirroredH = false, mirroredV = false,
     visible  = true,
     animations = {
-        Idle = { row = 0, frameCount = 6, fps = 8, loop = true  },
+        Idle = { row = 0, frameCount = 6, fps = 8, loop = true  }, -- Go see player.lua file for more comment
         Walk = { row = 1, frameCount = 8, fps = 8, loop = true  },
         Attack = { row = 2, frameCount = 6, fps = 12, loop = false }
     },
@@ -85,8 +85,8 @@ function orc:OnUpdate(dt)
     local newAction = "Idle"
 
     -- Movements
-    if IsEntityAlive(self.playerId) then
-        local playerAction = GetEntityString(self.playerId, "action")
+    if IsEntityAlive(self.playerId) then -- Check if player exist to avoid crash
+        local playerAction = GetEntityString(self.playerId, "action") -- Get player infos
         local playerX = GetEntityFloat(self.playerId, "x") + GetEntityFloat(self.playerId, "hitbox.ox")
         local playerW = GetEntityFloat(self.playerId, "hitbox.w")
         local playerY = GetEntityFloat(self.playerId, "y") + GetEntityFloat(self.playerId, "hitbox.oy")
@@ -96,17 +96,17 @@ function orc:OnUpdate(dt)
         local orcCenter = orcX + self.hitbox.w / 2
         local distanceX = math.abs(playerCenter - orcCenter)
 
-        if playerAction ~= "dead" then
+        if playerAction ~= "dead" then -- If player isn't dead, move and attack
             self.moving = true
-            if playerCenter < orcCenter then
+            if playerCenter < orcCenter then -- Move toward the player
                 self.dx = self.dx - self.speed * dt
             elseif playerCenter > orcCenter then
                 self.dx = self.dx + self.speed * dt
             end
-            if playerY - orcY < -self.hitbox.h / 2 and self.isGrounded then
+            if playerY - orcY < -self.hitbox.h / 2 and self.isGrounded then -- Jump if player is above
                 self.dy = self.dy - self.jumpStrength
             end
-            if distanceX <= self.axe.hitbox.w and self.action ~= "Attack" then
+            if distanceX <= self.axe.hitbox.w and self.action ~= "Attack" then -- If the player is within attack range, start the attack
                 self.timeBeforeAttackFrame = 0.25
                 self.timeBeforeNextAttack = 0.5
                 newAction = "Attack"
@@ -140,7 +140,7 @@ function orc:OnUpdate(dt)
     self.isGrounded = false
 
     -- Attack
-    if self.action == "Attack" then
+    if self.action == "Attack" then -- If the orc is attacking, check if it's time to create the axe hitbox and if the attack animation is finished
         self.timeBeforeAttackFrame = self.timeBeforeAttackFrame - dt
         self.timeBeforeNextAttack = self.timeBeforeNextAttack - dt
         if self.timeBeforeAttackFrame <= 0 and self.canAttack then
@@ -222,6 +222,6 @@ function orc:OnCollision(tag, entityId, overlapX, overlapY, overlapW, overlapH)
     end
 end
 
-function orc:OnDestroy()
-	DestroySound(soundId)
+function orc:OnDestroy() -- We destroy the sound when the orc is removed from the scene to avoid memory leak
+	DestroySound(soundId) -- The engine will destroy the sound automatically when the engine is closed, but it's good practice to destroy it when we don't need it anymore
 end
