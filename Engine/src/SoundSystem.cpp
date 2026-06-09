@@ -4,7 +4,7 @@ SoundSystem::SoundSystem() {
 }
 
 SoundSystem::~SoundSystem() {
-    sounds.clear();
+    CleanUp();
 }
 
 int SoundSystem::createSound(std::string filePath) {
@@ -93,7 +93,7 @@ void SoundSystem::pause(int soundId) {
 
 void SoundSystem::loop(int soundId, bool loop) {
     if (!exists(soundId)) return;
-    sounds[soundId]->loop = loop;
+    sounds[soundId]->setLooping(loop);
 }
 
 Uint64 SoundSystem::getStartTick(int soundId) {

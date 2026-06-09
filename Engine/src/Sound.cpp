@@ -149,3 +149,11 @@ void Sound::resume() {
 		paused = false;
 	}
 }
+
+bool Sound::isLooping() const {
+	return loop;
+}
+
+void Sound::setLooping(bool loop) {
+	loop = loop;
+}

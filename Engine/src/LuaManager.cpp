@@ -125,7 +125,7 @@ bool LuaManager::GetFields(std::string fieldsPath) {
 	for (int i = 1; i < (int)fields.size() - 1; i++) {
 		lua_getfield(L, -1, fields[i].c_str());
 		if (!lua_istable(L, -1)) {
-			lua_pop(L, i);
+			lua_pop(L, 1);
 			return false;
 		}
 		lua_remove(L, -2);

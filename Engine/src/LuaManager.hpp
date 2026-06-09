@@ -22,7 +22,7 @@ public:
 	template <typename R, typename O, typename... Args>
 	void RegisterFunction(O* obj, R(O::*func)(Args...), const char* name);
 	template <typename R, typename O, typename... Args>
-	void RegisterFunctionToLuaField(O* obj, R(O::* func)(Args...), const char* fieldPath, const char* name);
+	bool RegisterFunctionToLuaField(O* obj, R(O::* func)(Args...), const char* fieldPath, const char* name);
 	bool TryFile(const char* path);
 	bool DoFile(const char* path);
 	template <typename T, typename... Args>
@@ -121,10 +121,13 @@ void LuaManager::RegisterFunction(O* obj, R(O::*func)(Args...), const char* name
 }
 
 template <typename R, typename O, typename... Args>
-void LuaManager::RegisterFunctionToLuaField(O* obj, R(O::* func)(Args...), const char * fieldPath, const char* name) {
-	GetFields(fieldPath);
-	RegisterHelper(obj, func, std::make_index_sequence<sizeof...(Args)>{}, name);
-	lua_setfield(L, -2, name);
+bool LuaManager::RegisterFunctionToLuaField(O* obj, R(O::* func)(Args...), const char * fieldPath, const char* name) {
+	if (GetFields(fieldPath)) {
+		RegisterHelper(obj, func, std::make_index_sequence<sizeof...(Args)>{}, name);
+		lua_setfield(L, -2, name);
+		return true;
+	}
+	return false;
 }
 
 template <typename T, typename... Args>

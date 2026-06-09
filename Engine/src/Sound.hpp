@@ -24,7 +24,9 @@ public:
 	void stop();
 	void pause();
 	void resume();
-	bool loop;
+	bool isLooping() const;
+	void setLooping(bool loop);
+
 private:
 	void cleanUp();
 	void init(std::string filePath);
@@ -38,6 +40,7 @@ private:
 	bool playing;
 	bool paused;
 	bool usable;
+	bool loop;
 	int errorId;
 	float duration;
 	int loopStartMs;

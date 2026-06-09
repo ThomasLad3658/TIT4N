@@ -38,7 +38,7 @@ public:
 	int GetEntityIdByName(std::string name);
 	bool IsEntityAlive(int id);
 	template<typename T>
-	T GetEntityVariable(unsigned int id, std::string variablePath);
+	T GetEntityVariable(int id, std::string variablePath);
 
 private:
 	bool running = false;
@@ -62,7 +62,7 @@ private:
 };
 
 template <typename T>
-T Game::GetEntityVariable(unsigned int id, std::string variablePath) {
+T Game::GetEntityVariable(int id, std::string variablePath) {
 	for (const auto& entity : entities) {
 		if (entity->getId() == id) {
 			return luaManager->GetVariable<T>(("/" + std::to_string(entity->getReferenceIndex()) + "." + variablePath).c_str());
