@@ -129,7 +129,7 @@ void Entity::Update(float dt)
 	}
 
 	// Update animations
-	if (animationFrameCount > 0) {
+	if (animationFrameCount > 0 && animationFPS > 0) {
 		animationTimer += dt;
 		float frameDuration = 1.0f / animationFPS;
 		while (animationTimer >= frameDuration) {

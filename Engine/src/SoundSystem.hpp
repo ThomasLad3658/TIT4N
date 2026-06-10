@@ -14,6 +14,7 @@ public:
 	int createSoundWithDev(std::string filePath, SDL_AudioDeviceID dev);
 	bool exists(int soundId);
 	bool destroySound(int soundId);
+	void CleanUp();
 	void play(int soundId);
 	void playFrom(int soundId, int startMs);
 	void playFromTo(int soundId, int startMs, int endMs);

@@ -4,7 +4,7 @@ SoundSystem::SoundSystem() {
 }
 
 SoundSystem::~SoundSystem() {
-    sounds.clear();
+    CleanUp();
 }
 
 int SoundSystem::createSound(std::string filePath) {
@@ -30,6 +30,10 @@ int SoundSystem::createSoundWithDev(std::string filePath, SDL_AudioDeviceID dev)
 bool SoundSystem::destroySound(int soundId) {
     if (!exists(soundId)) return false;
 	return unregisterSound(soundId);
+}
+
+void SoundSystem::CleanUp() {
+    sounds.clear();
 }
 
 void SoundSystem::update() {
@@ -89,7 +93,7 @@ void SoundSystem::pause(int soundId) {
 
 void SoundSystem::loop(int soundId, bool loop) {
     if (!exists(soundId)) return;
-    sounds[soundId]->loop = loop;
+    sounds[soundId]->setLooping(loop);
 }
 
 Uint64 SoundSystem::getStartTick(int soundId) {
